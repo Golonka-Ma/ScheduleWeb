@@ -1,5 +1,6 @@
 package com.example.schedulebackend.service;
 
+import com.example.schedulebackend.dto.RegisterRequest;
 import com.example.schedulebackend.model.User;
 
 import java.util.Optional;

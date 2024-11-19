@@ -1,5 +1,4 @@
 package com.example.schedulebackend.service;
-
 import com.example.schedulebackend.model.ScheduleItem;
 import com.example.schedulebackend.repository.ScheduleItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,18 +1,18 @@
 package com.example.schedulebackend.controller;
 
+import com.example.schedulebackend.dto.LoginRequest;
+import com.example.schedulebackend.dto.RegisterRequest;
+import com.example.schedulebackend.mapper.UserMapper;
 import com.example.schedulebackend.model.User;
-import com.example.schedulebackend.service.UserService;
 import com.example.schedulebackend.security.JwtUtil;
+import com.example.schedulebackend.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Optional;
+import org.springframework.security.authentication.*;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -20,32 +20,40 @@ public class AuthController {
 
     private final UserService userService;
     private final JwtUtil jwtUtil;
-    private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+    private final UserMapper userMapper;
 
     @Autowired
-    public AuthController(UserService userService, JwtUtil jwtUtil, PasswordEncoder passwordEncoder) {
+    public AuthController(UserService userService, JwtUtil jwtUtil, AuthenticationManager authenticationManager, UserMapper userMapper) {
         this.userService = userService;
         this.jwtUtil = jwtUtil;
-        this.passwordEncoder = passwordEncoder;
+        this.authenticationManager = authenticationManager;
+        this.userMapper = userMapper;
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> authenticateUser(@Valid @RequestBody User loginRequest) {
-        Optional<User> userOptional = userService.findByEmail(loginRequest.getEmail());
-        if (userOptional.isPresent()) {
-            User user = userOptional.get();
-            if (passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-                String token = jwtUtil.generateToken(user.getEmail());
-                return ResponseEntity.ok(new AuthResponse(token));
-            }
+    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            loginRequest.getEmail(), loginRequest.getPassword())
+            );
+        } catch (AuthenticationException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password");
         }
-        return ResponseEntity.status(401).body("Invalid email or password");
+
+        String token = jwtUtil.generateToken(loginRequest.getEmail());
+        return ResponseEntity.ok(new AuthResponse(token));
     }
+
+
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody User user) {
-        if (userService.findByEmail(user.getEmail()).isPresent()) {
+    public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
+        if (userService.findByEmail(registerRequest.getEmail()).isPresent()) {
             return ResponseEntity.badRequest().body("Email is already in use");
         }
+
+        User user = userMapper.toUser(registerRequest);
         userService.registerUser(user);
         return ResponseEntity.ok("User registered successfully");
     }
