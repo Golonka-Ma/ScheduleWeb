@@ -110,42 +110,44 @@ const SchedulePage = () => {
       <Sidebar toggleDarkMode={toggleDarkMode} darkMode={darkMode} />
 
       {/* Main Content */}
-      <div className="ml-64 flex-1 container bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white mx-auto p-4 rounded-md">
-        <h1 className="text-2xl mb-4">Kalendarz</h1>
-        <button
-          onClick={() => {
-            setModalOpen(true);
-            setEditingEvent(null);
-          }}
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
-        >
-          Dodaj zadanie
-        </button>
-        <FullCalendar
-          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-          initialView="dayGridMonth"
-          events={events}
-          dateClick={handleDateClick}
-          eventClick={handleEventClick}
-          eventDrop={handleEventDrop}
-          editable
-          locales={[plLocale]}
-          locale="pl"
-          headerToolbar={{
-            left: "prev,next today",
-            center: "title",
-            right: "dayGridMonth,timeGridWeek,timeGridDay",
-          }}
-        />
-        {modalOpen && (
-          <AddScheduleItemModal
-            isOpen={modalOpen}
-            onClose={() => setModalOpen(false)}
-            onAdd={editingEvent ? handleEventEdit : handleEventAdd}
-            selectedDate={selectedDate}
-            editingEvent={editingEvent}
+      <div className="ml-64 flex-1 flex justify-center items-center">
+        <div className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white p-6 rounded-md shadow-lg max-w-7xl w-full">
+          <h1 className="text-2xl mb-4 text-center">Kalendarz</h1>
+          <button
+            onClick={() => {
+              setModalOpen(true);
+              setEditingEvent(null);
+            }}
+            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition block mx-auto mb-4"
+          >
+            Dodaj zadanie
+          </button>
+          <FullCalendar
+            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+            initialView="dayGridMonth"
+            events={events}
+            dateClick={handleDateClick}
+            eventClick={handleEventClick}
+            eventDrop={handleEventDrop}
+            editable
+            locales={[plLocale]}
+            locale="pl"
+            headerToolbar={{
+              left: "prev,next today",
+              center: "title",
+              right: "dayGridMonth,timeGridWeek,timeGridDay",
+            }}
           />
-        )}
+          {modalOpen && (
+            <AddScheduleItemModal
+              isOpen={modalOpen}
+              onClose={() => setModalOpen(false)}
+              onAdd={editingEvent ? handleEventEdit : handleEventAdd}
+              selectedDate={selectedDate}
+              editingEvent={editingEvent}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
