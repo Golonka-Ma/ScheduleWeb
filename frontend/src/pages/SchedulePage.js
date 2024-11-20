@@ -1,18 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import FullCalendar, { formatDate } from '@fullcalendar/react';
-import dayGridPlugin from '@fullcalendar/daygrid'; // widok miesiąca
-import timeGridPlugin from '@fullcalendar/timegrid'; // widok tygodnia/dnia
-import interactionPlugin from '@fullcalendar/interaction'; // interakcje (kliknięcie, przeciąganie)
-import plLocale from '@fullcalendar/core/locales/pl'; // język polski
-import { getSchedule, addScheduleItem } from '../services/scheduleService';
+import FullCalendar from '@fullcalendar/react';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import interactionPlugin from '@fullcalendar/interaction';
+import plLocale from '@fullcalendar/core/locales/pl';
+import {
+  getSchedule,
+  addScheduleItem,
+  updateScheduleItem,
+  deleteScheduleItem,
+} from '../services/scheduleService';
 import AddScheduleItemModal from '../components/AddScheduleItemModal';
-import axios from 'axios';
 
-function SchedulePage() {
+const SchedulePage = () => {
   const [events, setEvents] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
+  const [editingEvent, setEditingEvent] = useState(null);
 
+  // Fetch events on mount
   useEffect(() => {
     fetchEvents();
   }, []);
@@ -20,116 +26,108 @@ function SchedulePage() {
   const fetchEvents = async () => {
     try {
       const data = await getSchedule();
-      // Mapowanie danych na format wymagany przez FullCalendar
-      const events = data.map((item) => ({
-        id: item.id,
-        title: item.title,
-        start: item.startTime,
-        end: item.endTime,
-        extendedProps: {
-          description: item.description,
-        },
-      }));
-      setEvents(events);
+      setEvents(data);
     } catch (error) {
-      console.error(error);
+      console.error('Error fetching schedule:', error);
     }
   };
 
-
   const handleDateClick = (arg) => {
     setSelectedDate(arg.dateStr);
+    setEditingEvent(null); // Ensure we're not editing
     setModalOpen(true);
   };
 
-  const [editingEvent, setEditingEvent] = useState(null);
-
-const handleEventClick = (clickInfo) => {
-  setEditingEvent(clickInfo.event);
-};
-
-
   const handleEventAdd = async (eventData) => {
     try {
-      const newItem = await addScheduleItem(eventData);
-      setEvents([...events, {
-        id: newItem.id,
-        title: newItem.title,
-        start: newItem.startTime,
-        end: newItem.endTime,
-        extendedProps: {
-          description: newItem.description,
-        },
-      }]);
+      const newEvent = await addScheduleItem({
+        ...eventData,
+        startTime: selectedDate + 'T' + eventData.startTime,
+        endTime: selectedDate + 'T' + eventData.endTime,
+      });
+      setEvents([...events, newEvent]);
       setModalOpen(false);
     } catch (error) {
-      console.error(error);
-      alert('Nie udało się dodać zadania.');
+      console.error('Error adding event:', error);
+    }
+  };
+
+  const handleEventClick = (clickInfo) => {
+    const { id, title, startStr, endStr, extendedProps } = clickInfo.event;
+    setEditingEvent({
+      id,
+      title,
+      startTime: startStr.split('T')[1],
+      endTime: endStr.split('T')[1],
+      description: extendedProps.description,
+      type: extendedProps.type,
+      location: extendedProps.location,
+    });
+    setSelectedDate(startStr.split('T')[0]); // Extract date
+    setModalOpen(true);
+  };
+
+  const handleEventEdit = async (updatedData) => {
+    try {
+      const updatedEvent = await updateScheduleItem(editingEvent.id, updatedData);
+      setEvents((prevEvents) =>
+        prevEvents.map((event) =>
+          event.id === editingEvent.id ? { ...event, ...updatedEvent } : event
+        )
+      );
+      setModalOpen(false);
+    } catch (error) {
+      console.error('Error updating event:', error);
+    }
+  };
+
+  const handleEventDelete = async (id) => {
+    try {
+      await deleteScheduleItem(id);
+      setEvents(events.filter((event) => event.id !== id));
+    } catch (error) {
+      console.error('Error deleting event:', error);
     }
   };
 
   const handleEventDrop = async (info) => {
     try {
       const updatedEvent = {
-        id: info.event.id,
-        startTime: info.event.start,
-        endTime: info.event.end,
-        // Dodaj inne potrzebne pola
+        startTime: info.event.start.toISOString(),
+        endTime: info.event.end.toISOString(),
       };
       await updateScheduleItem(info.event.id, updatedEvent);
-      // Zaktualizuj stan wydarzeń
+      setEvents((prevEvents) =>
+        prevEvents.map((event) =>
+          event.id === info.event.id ? { ...event, ...updatedEvent } : event
+        )
+      );
     } catch (error) {
-      console.error(error);
-      // Cofnij zmiany w kalendarzu
-      info.revert();
-    }
-  };
-
-  const updateScheduleItem = async (id, item) => {
-    try {
-      const response = await axios.put(`${process.env.REACT_APP_API_URL}/${id}`, item, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-      // Zaktualizuj stan wydarzeń
-      const updatedEvents = events.map((event) => {
-        if (event.id === id) {
-          return {
-            id: response.data.id,
-            title: response.data.title,
-            start: response.data.startTime,
-            end: response.data.endTime,
-            extendedProps: {
-              description: response.data.description,
-            },
-          };
-        }
-        return event;
-      });
-      setEvents(updatedEvents);
-    } catch (error) {
-      console.error(error);
-      alert('Nie udało się zaktualizować zadania.');
+      console.error('Error updating event position:', error);
+      info.revert(); // Revert the drop if update fails
     }
   };
 
   return (
-    <div className="container bg-gray-600 mx-auto p-4">
-      <h1 className="text-2xl mb-4">Twój Kalendarz</h1>
+    <div className="container bg-gray-800 text-white mx-auto p-4 rounded-md">
+      <h1 className="text-2xl mb-4">Kalendarz</h1>
       <button
-          onClick={() => setModalOpen(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
-          Dodaj zadanie
+        onClick={() => {
+          setModalOpen(true);
+          setEditingEvent(null);
+        }}
+        className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+      >
+        Dodaj zadanie
       </button>
       <FullCalendar
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-        editable={true}
         initialView="dayGridMonth"
         events={events}
         dateClick={handleDateClick}
         eventClick={handleEventClick}
         eventDrop={handleEventDrop}
+        editable
         locales={[plLocale]}
         locale="pl"
         headerToolbar={{
@@ -142,12 +140,13 @@ const handleEventClick = (clickInfo) => {
         <AddScheduleItemModal
           isOpen={modalOpen}
           onClose={() => setModalOpen(false)}
-          onAdd={handleEventAdd}
+          onAdd={editingEvent ? handleEventEdit : handleEventAdd}
           selectedDate={selectedDate}
+          editingEvent={editingEvent}
         />
       )}
     </div>
   );
-}
+};
 
 export default SchedulePage;

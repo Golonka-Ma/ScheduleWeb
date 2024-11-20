@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Modal from 'react-modal';
 
-function EditScheduleItemModal({ isOpen, onClose, onAdd, selectedDate }) {
+function EditScheduleItemModal({ isOpen, onClose, onEdit, onDelete, taskData }) {
   const [formData, setFormData] = useState({
     title: '',
     type: '',
     location: '',
-    startTime: selectedDate,
-    endTime: selectedDate,
+    startTime: '',
+    endTime: '',
     description: '',
   });
 
-  // Definiowanie stylów modala
+  // Modal styles
   const customStyles = {
     content: {
       top: '50%',
@@ -20,7 +20,7 @@ function EditScheduleItemModal({ isOpen, onClose, onAdd, selectedDate }) {
       bottom: 'auto',
       marginRight: '-50%',
       transform: 'translate(-50%, -50%)',
-      backgroundColor: '#1f2937', // ciemny kolor tła
+      backgroundColor: '#1f2937',
       border: 'none',
       borderRadius: '8px',
       padding: '20px',
@@ -33,6 +33,19 @@ function EditScheduleItemModal({ isOpen, onClose, onAdd, selectedDate }) {
     },
   };
 
+  useEffect(() => {
+    if (taskData) {
+      setFormData({
+        title: taskData.title || '',
+        type: taskData.type || '',
+        location: taskData.location || '',
+        startTime: taskData.start || '', // Ensure proper format for datetime-local
+        endTime: taskData.end || '', // Ensure proper format for datetime-local
+        description: taskData.description || '',
+      });
+    }
+  }, [taskData]);
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -42,103 +55,93 @@ function EditScheduleItemModal({ isOpen, onClose, onAdd, selectedDate }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onAdd(formData);
+    onEdit(formData);
+  };
+
+  const handleDelete = () => {
+    if (window.confirm('Are you sure you want to delete this task?')) {
+      onDelete(taskData.id);
+      onClose();
+    }
   };
 
   return (
-    <Modal isOpen={isOpen} onRequestClose={onClose} contentLabel="Dodaj zadanie" style={customStyles}>
-      <h2 className="text-xl mb-4 text-white">Dodaj zadanie</h2>
+    <Modal isOpen={isOpen} onRequestClose={onClose} style={customStyles}>
+      <h2 className="text-xl mb-4 text-white">Edit Task</h2>
       <form onSubmit={handleSubmit}>
-        {/* Pole tytułu */}
         <input
           type="text"
           name="title"
-          className="border p-2 w-full mb-4 bg-gray-700 border-gray-300 text-white text-stm font-medium rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+          className="border p-2 w-full mb-4 bg-gray-700 text-white rounded-lg"
           value={formData.title}
           onChange={handleChange}
-          placeholder="Tytuł"
+          placeholder="Title"
           required
         />
-
-        {/* Pole typu */}
         <input
           type="text"
           name="type"
-          className="border p-2 w-full mb-4 bg-gray-700 border-gray-300 text-white text-stm font-medium rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+          className="border p-2 w-full mb-4 bg-gray-700 text-white rounded-lg"
           value={formData.type}
           onChange={handleChange}
-          placeholder="Typ"
+          placeholder="Type"
           required
         />
-
-        {/* Pole lokalizacji */}
         <input
           type="text"
           name="location"
-          className="border p-2 w-full mb-4 bg-gray-700 border-gray-300 text-white text-stm font-medium rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+          className="border p-2 w-full mb-4 bg-gray-700 text-white rounded-lg"
           value={formData.location}
           onChange={handleChange}
-          placeholder="Lokalizacja"
+          placeholder="Location"
           required
         />
-
-        {/* Pole dnia tygodnia */}
-        <select
-          name="dayOfWeek"
-          className="border p-2 w-full mb-4 bg-gray-700 border-gray-300 text-white text-stm font-medium rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-          value={formData.dayOfWeek}
-          onChange={handleChange}
-          required
-        >
-          <option value="">Wybierz dzień tygodnia</option>
-          <option value="MONDAY">Poniedziałek</option>
-          <option value="TUESDAY">Wtorek</option>
-          <option value="WEDNESDAY">Środa</option>
-          <option value="THURSDAY">Czwartek</option>
-          <option value="FRIDAY">Piątek</option>
-          <option value="SATURDAY">Sobota</option>
-          <option value="SUNDAY">Niedziela</option>
-        </select>
-
-        {/* Pole daty i godziny rozpoczęcia */}
-        <label className="block mb-2 text-white">Data i godzina rozpoczęcia</label>
+        <label className="block mb-2 text-white">Start Time</label>
         <input
           type="datetime-local"
           name="startTime"
-          className="border p-2 w-full mb-4 bg-gray-700 border-gray-300 text-white text-stm font-medium rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+          className="border p-2 w-full mb-4 bg-gray-700 text-white rounded-lg"
           value={formData.startTime}
           onChange={handleChange}
           required
         />
-
-        {/* Pole daty i godziny zakończenia */}
-        <label className="block mb-2 text-white">Data i godzina zakończenia</label>
+        <label className="block mb-2 text-white">End Time</label>
         <input
           type="datetime-local"
           name="endTime"
-          className="border p-2 w-full mb-4 bg-gray-700 border-gray-300 text-white text-stm font-medium rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+          className="border p-2 w-full mb-4 bg-gray-700 text-white rounded-lg"
           value={formData.endTime}
           onChange={handleChange}
           required
         />
-
-        {/* Pole opisu */}
         <textarea
           name="description"
-          className="border p-2 w-full mb-4 bg-gray-700 border-gray-300 text-white text-stm font-medium rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+          className="border p-2 w-full mb-4 bg-gray-700 text-white rounded-lg"
           value={formData.description}
           onChange={handleChange}
-          placeholder="Opis"
+          placeholder="Description"
+          required
         />
-
-        {/* Przyciski */}
-        <div className="flex justify-end">
-          <button type="button" onClick={onClose} className="bg-gray-500 text-white font-medium p-2 px-8 mr-2 rounded-lg">
-            Anuluj
+        <div className="flex justify-between">
+          <button
+            type="button"
+            onClick={handleDelete}
+            className="bg-red-500 text-white p-2 px-4 rounded-lg"
+          >
+            Delete
           </button>
-          <button type="submit" className="bg-green-500 text-white font-medium p-2 px-8 mr-2 rounded-lg">
-            Dodaj
-          </button>
+          <div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="bg-gray-500 text-white p-2 px-4 rounded-lg mr-2"
+            >
+              Cancel
+            </button>
+            <button type="submit" className="bg-green-500 text-white p-2 px-4 rounded-lg">
+              Save
+            </button>
+          </div>
         </div>
       </form>
     </Modal>
