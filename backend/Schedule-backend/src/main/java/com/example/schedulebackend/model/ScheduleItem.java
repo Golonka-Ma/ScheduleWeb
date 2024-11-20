@@ -34,6 +34,9 @@ public class ScheduleItem {
     @Size(max = 100)
     private String location;
 
+    @NotBlank(message = "Description is mandatory")
+    private String description;
+
     @NotNull(message = "Day of week is mandatory")
     @Enumerated(EnumType.STRING)
     private DayOfWeek dayOfWeek;
