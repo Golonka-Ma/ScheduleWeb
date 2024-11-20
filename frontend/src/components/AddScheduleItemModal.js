@@ -6,12 +6,13 @@ function AddScheduleItemModal({ isOpen, onClose, onAdd, selectedDate }) {
     title: '',
     type: '',
     location: '',
-    startTime: selectedDate,
-    endTime: selectedDate,
+    startDate: selectedDate,
+    startTime: '00:00',
+    endDate: selectedDate,
+    endTime: '01:00',
     description: '',
   });
 
-  // Definiowanie stylów modala
   const customStyles = {
     content: {
       top: '50%',
@@ -20,7 +21,7 @@ function AddScheduleItemModal({ isOpen, onClose, onAdd, selectedDate }) {
       bottom: 'auto',
       marginRight: '-50%',
       transform: 'translate(-50%, -50%)',
-      backgroundColor: '#1f2937', // ciemny kolor tła
+      backgroundColor: '#1f2937', // Dark background
       border: 'none',
       borderRadius: '8px',
       padding: '20px',
@@ -42,101 +43,113 @@ function AddScheduleItemModal({ isOpen, onClose, onAdd, selectedDate }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onAdd(formData);
+    // Combine date and time into ISO 8601 format
+    const startTime = `${formData.startDate}T${formData.startTime}`;
+    const endTime = `${formData.endDate}T${formData.endTime}`;
+    onAdd({ ...formData, startTime, endTime });
+    onClose(); // Close the modal after adding
   };
 
   return (
     <Modal isOpen={isOpen} onRequestClose={onClose} contentLabel="Dodaj zadanie" style={customStyles}>
       <h2 className="text-xl mb-4 text-white">Dodaj zadanie</h2>
       <form onSubmit={handleSubmit}>
-        {/* Pole tytułu */}
+        {/* Title */}
         <input
           type="text"
           name="title"
-          className="border p-2 w-full mb-4 bg-gray-700 border-gray-300 text-white text-stm font-medium rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+          className="border p-2 w-full mb-4 bg-gray-700 text-white rounded-lg"
           value={formData.title}
           onChange={handleChange}
           placeholder="Tytuł"
           required
         />
 
-        {/* Pole typu */}
+        {/* Type */}
         <input
           type="text"
           name="type"
-          className="border p-2 w-full mb-4 bg-gray-700 border-gray-300 text-white text-stm font-medium rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+          className="border p-2 w-full mb-4 bg-gray-700 text-white rounded-lg"
           value={formData.type}
           onChange={handleChange}
           placeholder="Typ"
           required
         />
 
-        {/* Pole lokalizacji */}
+        {/* Location */}
         <input
           type="text"
           name="location"
-          className="border p-2 w-full mb-4 bg-gray-700 border-gray-300 text-white text-stm font-medium rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+          className="border p-2 w-full mb-4 bg-gray-700 text-white rounded-lg"
           value={formData.location}
           onChange={handleChange}
           placeholder="Lokalizacja"
           required
         />
 
-        {/* Pole dnia tygodnia */}
-        <select
-          name="dayOfWeek"
-          className="border p-2 w-full mb-4 bg-gray-700 border-gray-300 text-white text-stm font-medium rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-          value={formData.dayOfWeek}
+        {/* Start Date and Time */}
+        <label className="block mb-2 text-white">Data rozpoczęcia</label>
+        <input
+          type="date"
+          name="startDate"
+          className="border p-2 w-full mb-4 bg-gray-700 text-white rounded-lg"
+          value={formData.startDate}
           onChange={handleChange}
           required
-        >
-          <option value="">Wybierz dzień tygodnia</option>
-          <option value="MONDAY">Poniedziałek</option>
-          <option value="TUESDAY">Wtorek</option>
-          <option value="WEDNESDAY">Środa</option>
-          <option value="THURSDAY">Czwartek</option>
-          <option value="FRIDAY">Piątek</option>
-          <option value="SATURDAY">Sobota</option>
-          <option value="SUNDAY">Niedziela</option>
-        </select>
-
-        {/* Pole daty i godziny rozpoczęcia */}
-        <label className="block mb-2 text-white">Data i godzina rozpoczęcia</label>
+        />
+        <label className="block mb-2 text-white">Godzina rozpoczęcia</label>
         <input
-          type="datetime-local"
+          type="time"
           name="startTime"
-          className="border p-2 w-full mb-4 bg-gray-700 border-gray-300 text-white text-stm font-medium rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+          className="border p-2 w-full mb-4 bg-gray-700 text-white rounded-lg"
           value={formData.startTime}
           onChange={handleChange}
           required
         />
 
-        {/* Pole daty i godziny zakończenia */}
-        <label className="block mb-2 text-white">Data i godzina zakończenia</label>
+        {/* End Date and Time */}
+        <label className="block mb-2 text-white">Data zakończenia</label>
         <input
-          type="datetime-local"
+          type="date"
+          name="endDate"
+          className="border p-2 w-full mb-4 bg-gray-700 text-white rounded-lg"
+          value={formData.endDate}
+          onChange={handleChange}
+          required
+        />
+        <label className="block mb-2 text-white">Godzina zakończenia</label>
+        <input
+          type="time"
           name="endTime"
-          className="border p-2 w-full mb-4 bg-gray-700 border-gray-300 text-white text-stm font-medium rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+          className="border p-2 w-full mb-4 bg-gray-700 text-white rounded-lg"
           value={formData.endTime}
           onChange={handleChange}
           required
         />
 
-        {/* Pole opisu */}
+        {/* Description */}
         <textarea
           name="description"
-          className="border p-2 w-full mb-4 bg-gray-700 border-gray-300 text-white text-stm font-medium rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+          className="border p-2 w-full mb-4 bg-gray-700 text-white rounded-lg"
           value={formData.description}
           onChange={handleChange}
           placeholder="Opis"
+          required
         />
 
-        {/* Przyciski */}
+        {/* Buttons */}
         <div className="flex justify-end">
-          <button type="button" onClick={onClose} className="bg-gray-500 text-white font-medium p-2 px-8 mr-2 rounded-lg">
+          <button
+            type="button"
+            onClick={onClose}
+            className="bg-gray-500 text-white font-medium p-2 px-8 mr-2 rounded-lg"
+          >
             Anuluj
           </button>
-          <button type="submit" className="bg-green-500 text-white font-medium p-2 px-8 mr-2 rounded-lg">
+          <button
+            type="submit"
+            className="bg-green-500 text-white font-medium p-2 px-8 rounded-lg"
+          >
             Dodaj
           </button>
         </div>
