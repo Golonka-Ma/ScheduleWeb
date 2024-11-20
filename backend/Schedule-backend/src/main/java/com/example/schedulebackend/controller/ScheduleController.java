@@ -70,4 +70,43 @@ public class ScheduleController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Non existing task");
         }
     }
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<String> updateScheduleItem(
+            HttpServletRequest request,
+            @PathVariable Long id,
+            @RequestBody @Valid ScheduleItem updatedItem) {
+
+        String email = (String) request.getAttribute("userEmail");
+        if (email == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized: User not authenticated");
+        }
+
+        User user = userService.findByEmail(email).orElseThrow(() ->
+                new RuntimeException("User not found"));
+
+        // Fetch existing item or return 404 if not found
+        ScheduleItem existingItem = scheduleService.findById(id)
+                .orElse(null);
+
+        if (existingItem == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Schedule item not found");
+        }
+
+        // Verify the schedule item belongs to the authenticated user
+        if (!existingItem.getUser().getId().equals(user.getId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not authorized to update this item");
+        }
+
+        // Update the fields
+        existingItem.setTitle(updatedItem.getTitle());
+        existingItem.setType(updatedItem.getType());
+        existingItem.setLocation(updatedItem.getLocation());
+        existingItem.setDescription(updatedItem.getDescription());
+        existingItem.setStartTime(updatedItem.getStartTime());
+        existingItem.setEndTime(updatedItem.getEndTime());
+
+        scheduleService.addScheduleItem(existingItem); // Save updated item
+        return ResponseEntity.ok("Schedule item updated successfully");
+    }
 }

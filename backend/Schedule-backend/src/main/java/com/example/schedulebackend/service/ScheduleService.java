@@ -3,6 +3,7 @@ package com.example.schedulebackend.service;
 import com.example.schedulebackend.model.ScheduleItem;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ScheduleService {
 
@@ -11,6 +12,5 @@ public interface ScheduleService {
     ScheduleItem addScheduleItem(ScheduleItem scheduleItem);
 
     void deleteScheduleItem(Long id);
-
-    // Dodatkowe metody, np. aktualizacja pozycji
+    Optional<ScheduleItem> findById(Long id);
 }

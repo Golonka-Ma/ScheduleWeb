@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ScheduleServiceImpl implements ScheduleService {
@@ -12,9 +13,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     private final ScheduleItemRepository scheduleItemRepository;
 
     @Autowired
-    public ScheduleServiceImpl(ScheduleItemRepository scheduleItemRepository) {
-        this.scheduleItemRepository = scheduleItemRepository;
-    }
+    public ScheduleServiceImpl(ScheduleItemRepository scheduleItemRepository) {this.scheduleItemRepository = scheduleItemRepository;}
 
     @Override
     public List<ScheduleItem> getScheduleForUser(Long userId) {
@@ -30,6 +29,6 @@ public class ScheduleServiceImpl implements ScheduleService {
     public void deleteScheduleItem(Long id) {
         scheduleItemRepository.deleteById(id);
     }
-
-    // Implementacja dodatkowych metod
+    @Override
+    public Optional<ScheduleItem> findById(Long id) {return scheduleItemRepository.findById(id);}
 }
