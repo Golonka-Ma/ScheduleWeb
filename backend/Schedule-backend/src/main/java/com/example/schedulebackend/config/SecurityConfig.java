@@ -51,6 +51,7 @@ public class SecurityConfig {
             .csrf().disable()
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
+                    .requestMatchers("/api/schedule/**").authenticated()
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
