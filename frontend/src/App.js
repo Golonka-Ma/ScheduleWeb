@@ -17,7 +17,6 @@ function App() {
             <Route path="/register" element={<RegisterPage />} />
           </Routes>
       </Router>
-      <button onClick={() => setDarkMode(!darkMode)}>Przełącz tryb</button>
     </div>
   );
 }

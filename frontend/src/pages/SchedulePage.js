@@ -24,25 +24,32 @@ const Sidebar = ({ toggleDarkMode, darkMode }) => {
   return (
     <div className="h-screen w-64 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 fixed top-0 left-0 flex flex-col items-center py-6">
       <div className="mb-10">
-        <h1 className="text-2xl font-bold">My Schedule</h1>
+        <h1 className="text-2xl font-bold">Mój Harmonogram</h1>
       </div>
-      <button
-        onClick={toggleDarkMode}
-        className="mb-6 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none"
-      >
-        {darkMode ? "Light Mode" : "Dark Mode"}
-      </button>
       <a
         href="#"
         className="mb-6 px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-600 focus:outline-none"
       >
-        User Settings
+        Ustawienia użytkownika
       </a>
+
+      {/* Spacing to push the buttons to the bottom */}
+      <div className="flex-1"></div>
+
+      {/* Dark Mode Button */}
+      <button
+        onClick={toggleDarkMode}
+        className="mb-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none"
+      >
+        {darkMode ? "Tryb jasny" : "Tryb ciemny"}
+      </button>
+
+      {/* Logout Button */}
       <button
         onClick={handleLogout}
-        className="mt-auto mb-6 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:outline-none"
+        className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:outline-none"
       >
-        Logout
+        Wyloguj się
       </button>
     </div>
   );
