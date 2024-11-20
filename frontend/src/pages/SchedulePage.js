@@ -11,8 +11,16 @@ import {
   deleteScheduleItem,
 } from '../services/scheduleService';
 import AddScheduleItemModal from '../components/AddScheduleItemModal';
+import { useNavigate } from "react-router-dom";
 
 const Sidebar = ({ toggleDarkMode, darkMode }) => {
+  const navigate = useNavigate(); // Hook do nawigacji
+
+  const handleLogout = () => {
+    localStorage.removeItem("authToken"); // Usuń token lub dane sesji
+    navigate("/login"); // Przekierowanie do strony logowania
+  };
+
   return (
     <div className="h-screen w-64 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 fixed top-0 left-0 flex flex-col items-center py-6">
       <div className="mb-10">
@@ -31,7 +39,7 @@ const Sidebar = ({ toggleDarkMode, darkMode }) => {
         User Settings
       </a>
       <button
-        onClick={() => alert("Logged out")}
+        onClick={handleLogout}
         className="mt-auto mb-6 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:outline-none"
       >
         Logout
@@ -48,6 +56,8 @@ const SchedulePage = () => {
   const [darkMode, setDarkMode] = useState(
     localStorage.getItem("darkMode") === "true"
   );
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (darkMode) {
