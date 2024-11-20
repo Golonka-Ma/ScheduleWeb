@@ -8,7 +8,6 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
 import java.time.DayOfWeek;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Entity
@@ -39,12 +38,17 @@ public class ScheduleItem {
     @NotBlank(message = "Description is mandatory")
     private String description;
 
-    @NotNull(message = "Date and time is mandatory")
-    private LocalDateTime startTime;
+    @NotNull(message = "Day of week is mandatory")
+    @Enumerated(EnumType.STRING)
+    private DayOfWeek dayOfWeek;
+
+    @NotNull(message = "Start time is mandatory")
+    private LocalTime startTime;
 
     @NotNull(message = "End time is mandatory")
-    private LocalDateTime endTime;
+    private LocalTime endTime;
 
+    // Relacja z User
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     @JsonIgnore
