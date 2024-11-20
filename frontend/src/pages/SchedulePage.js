@@ -12,139 +12,131 @@ import {
 } from '../services/scheduleService';
 import AddScheduleItemModal from '../components/AddScheduleItemModal';
 
+const Sidebar = ({ toggleDarkMode, darkMode }) => {
+  return (
+    <div className="h-screen w-64 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 fixed top-0 left-0 flex flex-col items-center py-6">
+      <div className="mb-10">
+        <h1 className="text-2xl font-bold">My Schedule</h1>
+      </div>
+      <button
+        onClick={toggleDarkMode}
+        className="mb-6 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none"
+      >
+        {darkMode ? "Light Mode" : "Dark Mode"}
+      </button>
+      <a
+        href="#"
+        className="mb-6 px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-600 focus:outline-none"
+      >
+        User Settings
+      </a>
+      <button
+        onClick={() => alert("Logged out")}
+        className="mt-auto mb-6 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:outline-none"
+      >
+        Logout
+      </button>
+    </div>
+  );
+};
+
 const SchedulePage = () => {
-  const [events, setEvents] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
   const [editingEvent, setEditingEvent] = useState(null);
+  const [events, setEvents] = useState([]);
+  const [darkMode, setDarkMode] = useState(
+    localStorage.getItem("darkMode") === "true"
+  );
 
-  // Fetch events on mount
   useEffect(() => {
-    fetchEvents();
-  }, []);
-
-  const fetchEvents = async () => {
-    try {
-      const data = await getSchedule();
-      setEvents(data);
-    } catch (error) {
-      console.error('Error fetching schedule:', error);
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
     }
+    localStorage.setItem("darkMode", darkMode);
+  }, [darkMode]);
+
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
   };
 
-  const handleDateClick = (arg) => {
-    setSelectedDate(arg.dateStr);
-    setEditingEvent(null); // Ensure we're not editing
+  const handleDateClick = (info) => {
+    setSelectedDate(info.dateStr);
     setModalOpen(true);
   };
 
-  const handleEventAdd = async (eventData) => {
-    try {
-      const newEvent = await addScheduleItem({
-        ...eventData,
-        startTime: selectedDate + 'T' + eventData.startTime,
-        endTime: selectedDate + 'T' + eventData.endTime,
-      });
-      setEvents([...events, newEvent]);
-      setModalOpen(false);
-    } catch (error) {
-      console.error('Error adding event:', error);
-    }
-  };
-
-  const handleEventClick = (clickInfo) => {
-    const { id, title, startStr, endStr, extendedProps } = clickInfo.event;
-    setEditingEvent({
-      id,
-      title,
-      startTime: startStr.split('T')[1],
-      endTime: endStr.split('T')[1],
-      description: extendedProps.description,
-      type: extendedProps.type,
-      location: extendedProps.location,
-    });
-    setSelectedDate(startStr.split('T')[0]); // Extract date
+  const handleEventClick = (info) => {
+    setEditingEvent(info.event);
     setModalOpen(true);
   };
 
-  const handleEventEdit = async (updatedData) => {
-    try {
-      const updatedEvent = await updateScheduleItem(editingEvent.id, updatedData);
-      setEvents((prevEvents) =>
-        prevEvents.map((event) =>
-          event.id === editingEvent.id ? { ...event, ...updatedEvent } : event
-        )
-      );
-      setModalOpen(false);
-    } catch (error) {
-      console.error('Error updating event:', error);
-    }
+  const handleEventDrop = (info) => {
+    const updatedEvents = events.map((event) =>
+      event.id === info.event.id
+        ? { ...event, start: info.event.startStr, end: info.event.endStr }
+        : event
+    );
+    setEvents(updatedEvents);
   };
 
-  const handleEventDelete = async (id) => {
-    try {
-      await deleteScheduleItem(id);
-      setEvents(events.filter((event) => event.id !== id));
-    } catch (error) {
-      console.error('Error deleting event:', error);
-    }
+  const handleEventAdd = (newEvent) => {
+    setEvents([...events, newEvent]);
+    setModalOpen(false);
   };
 
-  const handleEventDrop = async (info) => {
-    try {
-      const updatedEvent = {
-        startTime: info.event.start.toISOString(),
-        endTime: info.event.end.toISOString(),
-      };
-      await updateScheduleItem(info.event.id, updatedEvent);
-      setEvents((prevEvents) =>
-        prevEvents.map((event) =>
-          event.id === info.event.id ? { ...event, ...updatedEvent } : event
-        )
-      );
-    } catch (error) {
-      console.error('Error updating event position:', error);
-      info.revert(); // Revert the drop if update fails
-    }
+  const handleEventEdit = (updatedEvent) => {
+    const updatedEvents = events.map((event) =>
+      event.id === updatedEvent.id ? updatedEvent : event
+    );
+    setEvents(updatedEvents);
+    setModalOpen(false);
   };
 
   return (
-    <div className="container bg-gray-800 text-white mx-auto p-4 rounded-md">
-      <h1 className="text-2xl mb-4">Kalendarz</h1>
-      <button
-        onClick={() => {
-          setModalOpen(true);
-          setEditingEvent(null);
-        }}
-        className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
-      >
-        Dodaj zadanie
-      </button>
-      <FullCalendar
-        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-        initialView="dayGridMonth"
-        events={events}
-        dateClick={handleDateClick}
-        eventClick={handleEventClick}
-        eventDrop={handleEventDrop}
-        editable
-        locales={[plLocale]}
-        locale="pl"
-        headerToolbar={{
-          left: 'prev,next today',
-          center: 'title',
-          right: 'dayGridMonth,timeGridWeek,timeGridDay',
-        }}
-      />
-      {modalOpen && (
-        <AddScheduleItemModal
-          isOpen={modalOpen}
-          onClose={() => setModalOpen(false)}
-          onAdd={editingEvent ? handleEventEdit : handleEventAdd}
-          selectedDate={selectedDate}
-          editingEvent={editingEvent}
+    <div className={`flex bg-gray-100 dark:bg-gray-900 min-h-screen`}>
+      {/* Sidebar */}
+      <Sidebar toggleDarkMode={toggleDarkMode} darkMode={darkMode} />
+
+      {/* Main Content */}
+      <div className="ml-64 flex-1 container bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white mx-auto p-4 rounded-md">
+        <h1 className="text-2xl mb-4">Kalendarz</h1>
+        <button
+          onClick={() => {
+            setModalOpen(true);
+            setEditingEvent(null);
+          }}
+          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+        >
+          Dodaj zadanie
+        </button>
+        <FullCalendar
+          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+          initialView="dayGridMonth"
+          events={events}
+          dateClick={handleDateClick}
+          eventClick={handleEventClick}
+          eventDrop={handleEventDrop}
+          editable
+          locales={[plLocale]}
+          locale="pl"
+          headerToolbar={{
+            left: "prev,next today",
+            center: "title",
+            right: "dayGridMonth,timeGridWeek,timeGridDay",
+          }}
         />
-      )}
+        {modalOpen && (
+          <AddScheduleItemModal
+            isOpen={modalOpen}
+            onClose={() => setModalOpen(false)}
+            onAdd={editingEvent ? handleEventEdit : handleEventAdd}
+            selectedDate={selectedDate}
+            editingEvent={editingEvent}
+          />
+        )}
+      </div>
     </div>
   );
 };
