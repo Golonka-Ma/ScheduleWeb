@@ -12,17 +12,19 @@ import {
 } from '../services/scheduleService';
 import AddScheduleItemModal from '../components/AddScheduleItemModal';
 import { useNavigate } from "react-router-dom";
+import { SunIcon, MoonIcon } from "@heroicons/react/24/solid"; // Poprawione importy
+
 
 const Sidebar = ({ toggleDarkMode, darkMode }) => {
-  const navigate = useNavigate(); // Hook do nawigacji
+  const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem("authToken"); // Usuń token lub dane sesji
-    navigate("/login"); // Przekierowanie do strony logowania
+    localStorage.removeItem("authToken");
+    navigate("/login");
   };
 
   return (
-    <div className="h-screen w-64 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 fixed top-0 left-0 flex flex-col items-center py-6">
+    <div className="h-screen w-64 bg-gray-300 dark:bg-gray-800 text-gray-900 dark:text-gray-100 fixed top-0 left-0 flex flex-col items-center py-6">
       <div className="mb-10">
         <h1 className="text-2xl font-bold">Mój Harmonogram</h1>
       </div>
@@ -33,27 +35,40 @@ const Sidebar = ({ toggleDarkMode, darkMode }) => {
         Ustawienia użytkownika
       </a>
 
-      {/* Spacing to push the buttons to the bottom */}
+      {/* Spacer */}
       <div className="flex-1"></div>
 
-      {/* Dark Mode Button */}
-      <button
+      {/* Dark Mode Toggle */}
+      <div
+        className={`flex items-center justify-between w-40 px-4 py-2 rounded-full cursor-pointer ${
+          darkMode ? "bg-blue-800" : "bg-yellow-400"
+        }`}
         onClick={toggleDarkMode}
-        className="mb-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none"
       >
-        {darkMode ? "Tryb jasny" : "Tryb ciemny"}
-      </button>
+        {darkMode ? (
+          <>
+            <MoonIcon className="w-6 h-6 text-white" />
+            <span className="text-white font-semibold">Tryb ciemny</span>
+          </>
+        ) : (
+          <>
+            <SunIcon className="w-6 h-6 text-yellow-800" />
+            <span className="text-yellow-800 font-semibold">Tryb jasny</span>
+          </>
+        )}
+      </div>
 
       {/* Logout Button */}
       <button
         onClick={handleLogout}
-        className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:outline-none"
+        className="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:outline-none"
       >
         Wyloguj się
       </button>
     </div>
   );
 };
+
 
 const SchedulePage = () => {
   const [modalOpen, setModalOpen] = useState(false);
@@ -112,13 +127,13 @@ const SchedulePage = () => {
   };
 
   return (
-    <div className={`flex bg-gray-100 dark:bg-gray-900 min-h-screen`}>
+    <div className={`flex bg-gray-300 dark:bg-gray-900 min-h-screen`}>
       {/* Sidebar */}
       <Sidebar toggleDarkMode={toggleDarkMode} darkMode={darkMode} />
 
       {/* Main Content */}
       <div className="ml-64 flex-1 flex justify-center items-center">
-        <div className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white p-6 rounded-md shadow-lg max-w-7xl w-full">
+        <div className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white p-6 rounded-md shadow-lg max-w-full w-full">
           <h1 className="text-2xl mb-4 text-center">Kalendarz</h1>
           <button
             onClick={() => {
