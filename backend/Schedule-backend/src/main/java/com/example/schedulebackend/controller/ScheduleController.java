@@ -22,6 +22,7 @@ public class ScheduleController {
         this.userService = userService;
     }
 
+    
     @GetMapping
     public List<ScheduleItem> getSchedule(@AuthenticationPrincipal User user) {
         return scheduleService.getScheduleForUser(user.getId());
