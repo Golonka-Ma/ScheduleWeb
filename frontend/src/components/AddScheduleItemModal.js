@@ -32,7 +32,7 @@ function AddScheduleItemModal({ isOpen, onClose, onAdd, selectedDate }) {
       bottom: 'auto',
       marginRight: '-50%',
       transform: 'translate(-50%, -50%)',
-      backgroundColor: '#FF0000', // Dark background
+      backgroundColor: '#1f2937',
       border: 'none',
       borderRadius: '8px',
       padding: '20px',
@@ -77,6 +77,7 @@ function AddScheduleItemModal({ isOpen, onClose, onAdd, selectedDate }) {
         startTime, // Correct ISO 8601 format
         endTime, // Correct ISO 8601 format
         description: formData.description,
+        priority: formData.priority,
       });
   
       onClose(); // Close the modal after submission
@@ -123,6 +124,21 @@ function AddScheduleItemModal({ isOpen, onClose, onAdd, selectedDate }) {
           placeholder="Lokalizacja"
           required
         />
+
+        {/* Priority */}
+<label className="block mb-2 text-white">Priority</label>
+<select
+  name="priority"
+  className="border p-2 w-full mb-4 bg-gray-700 text-white rounded-lg"
+  value={formData.priority}
+  onChange={handleChange}
+  required
+>
+  <option value="low">Low</option>
+  <option value="medium">Medium</option>
+  <option value="high">High</option>
+</select>
+
 
         {/* Start Date */}
         <label className="block mb-2 text-white">Data rozpoczęcia</label>

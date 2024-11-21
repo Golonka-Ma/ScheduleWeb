@@ -32,19 +32,15 @@ public class ScheduleController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        User user = userService.findByEmail(email).orElseThrow(() ->
-                new RuntimeException("User not found"));
+        User user = userService.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
 
         List<ScheduleItem> scheduleItems = scheduleService.getScheduleForUser(user.getId());
-
         List<ScheduleItemDTO> scheduleItemDTOs = scheduleItems.stream()
                 .map(ScheduleItemDTO::new)
                 .toList();
 
         return ResponseEntity.ok(scheduleItemDTOs);
     }
-
-
 
     @PostMapping("/add")
     public ResponseEntity<ScheduleItemDTO> addScheduleItem(HttpServletRequest request, @RequestBody @Valid ScheduleItem scheduleItem) {
@@ -53,12 +49,11 @@ public class ScheduleController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        User user = userService.findByEmail(email).orElseThrow(() ->
-                new RuntimeException("User not found"));
+        User user = userService.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
         scheduleItem.setUser(user);
+        scheduleItem.setPriority(scheduleItem.getPriority().toLowerCase()); // Normalize priority
         ScheduleItem savedItem = scheduleService.addScheduleItem(scheduleItem);
 
-        // Return the saved item as a DTO
         return ResponseEntity.status(HttpStatus.CREATED).body(new ScheduleItemDTO(savedItem));
     }
 
@@ -83,31 +78,27 @@ public class ScheduleController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized: User not authenticated");
         }
 
-        User user = userService.findByEmail(email).orElseThrow(() ->
-                new RuntimeException("User not found"));
+        User user = userService.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Fetch existing item or return 404 if not found
-        ScheduleItem existingItem = scheduleService.findById(id)
-                .orElse(null);
+        ScheduleItem existingItem = scheduleService.findById(id).orElse(null);
 
         if (existingItem == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Schedule item not found");
         }
 
-        // Verify the schedule item belongs to the authenticated user
         if (!existingItem.getUser().getId().equals(user.getId())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not authorized to update this item");
         }
 
-        // Update the fields
         existingItem.setTitle(updatedItem.getTitle());
         existingItem.setType(updatedItem.getType());
         existingItem.setLocation(updatedItem.getLocation());
         existingItem.setDescription(updatedItem.getDescription());
         existingItem.setStartTime(updatedItem.getStartTime());
         existingItem.setEndTime(updatedItem.getEndTime());
+        existingItem.setPriority(updatedItem.getPriority().toLowerCase()); // Update priority
 
-        scheduleService.addScheduleItem(existingItem); // Save updated item
+        scheduleService.addScheduleItem(existingItem);
         return ResponseEntity.ok("Schedule item updated successfully");
     }
 }
