@@ -18,6 +18,7 @@ public class ScheduleItemDTO {
     private String description;
     private String startTime;
     private String endTime;
+    private String priority;
 
     public ScheduleItemDTO(ScheduleItem scheduleItem) {
         this.id = scheduleItem.getId();
@@ -27,6 +28,8 @@ public class ScheduleItemDTO {
         this.description = scheduleItem.getDescription();
         this.startTime = scheduleItem.getStartTime().toString();
         this.endTime = scheduleItem.getEndTime().toString();
+        this.priority = scheduleItem.getPriority();
     }
 }
+
 

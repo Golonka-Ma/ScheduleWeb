@@ -39,11 +39,15 @@ public class ScheduleItem {
     @NotBlank(message = "Description is mandatory")
     private String description;
 
-    @NotNull(message = "Date and time is mandatory")
+    @NotNull(message = "Start time is mandatory")
     private LocalDateTime startTime;
 
     @NotNull(message = "End time is mandatory")
     private LocalDateTime endTime;
+
+    @NotBlank(message = "Priority is mandatory")
+    @Size(max = 20)
+    private String priority;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
