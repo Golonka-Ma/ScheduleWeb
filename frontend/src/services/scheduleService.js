@@ -27,8 +27,8 @@ export const addScheduleItem = async (item) => {
   const response = await axios.post(`${API_URL}/add`, item, {
     headers: { Authorization: `Bearer ${getToken()}` },
   });
-  return response.data;
-};
+  return response.data; // Expecting the saved event object
+}
 
 // Update a schedule item
 export const updateScheduleItem = async (id, item) => {

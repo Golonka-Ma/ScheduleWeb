@@ -20,7 +20,7 @@ function EditScheduleItemModal({ isOpen, onClose, onEdit, onDelete, taskData }) 
       bottom: 'auto',
       marginRight: '-50%',
       transform: 'translate(-50%, -50%)',
-      backgroundColor: '#1f2937',
+      backgroundColor: '#00ff00',
       border: 'none',
       borderRadius: '8px',
       padding: '20px',

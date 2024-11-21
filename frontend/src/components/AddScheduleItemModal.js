@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
 
 function AddScheduleItemModal({ isOpen, onClose, onAdd, selectedDate }) {
@@ -6,12 +6,23 @@ function AddScheduleItemModal({ isOpen, onClose, onAdd, selectedDate }) {
     title: '',
     type: '',
     location: '',
-    startDate: selectedDate,
+    startDate: selectedDate || '', // Ensure it's set correctly from props
     startTime: '00:00',
-    endDate: selectedDate,
+    endDate: selectedDate || '',
     endTime: '01:00',
     description: '',
   });
+
+  useEffect(() => {
+    // Update startDate and endDate if selectedDate changes
+    if (selectedDate) {
+      setFormData((prevState) => ({
+        ...prevState,
+        startDate: selectedDate,
+        endDate: selectedDate,
+      }));
+    }
+  }, [selectedDate]);
 
   const customStyles = {
     content: {
@@ -21,7 +32,7 @@ function AddScheduleItemModal({ isOpen, onClose, onAdd, selectedDate }) {
       bottom: 'auto',
       marginRight: '-50%',
       transform: 'translate(-50%, -50%)',
-      backgroundColor: '#1f2937', // Dark background
+      backgroundColor: '#FF0000', // Dark background
       border: 'none',
       borderRadius: '8px',
       padding: '20px',
@@ -43,12 +54,38 @@ function AddScheduleItemModal({ isOpen, onClose, onAdd, selectedDate }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Combine date and time into ISO 8601 format
-    const startTime = `${formData.startDate}T${formData.startTime}`;
-    const endTime = `${formData.endDate}T${formData.endTime}`;
-    onAdd({ ...formData, startTime, endTime });
-    onClose(); // Close the modal after adding
+  
+    try {
+      // Validate that required fields are filled
+      if (!formData.startDate || !formData.startTime || !formData.endDate || !formData.endTime) {
+        throw new Error('All date and time fields must be filled.');
+      }
+  
+      // Combine date and time into ISO 8601 format
+      const startTime = `${formData.startDate}T${formData.startTime}`;
+      const endTime = `${formData.endDate}T${formData.endTime}`;
+  
+      if (new Date(startTime) >= new Date(endTime)) {
+        throw new Error('Start time must be before end time.');
+      }
+  
+      // Pass correctly formatted data to the parent
+      onAdd({
+        title: formData.title,
+        type: formData.type,
+        location: formData.location,
+        startTime, // Correct ISO 8601 format
+        endTime, // Correct ISO 8601 format
+        description: formData.description,
+      });
+  
+      onClose(); // Close the modal after submission
+    } catch (error) {
+      console.error('Validation Error:', error.message);
+      alert(error.message);
+    }
   };
+  
 
   return (
     <Modal isOpen={isOpen} onRequestClose={onClose} contentLabel="Dodaj zadanie" style={customStyles}>
@@ -87,7 +124,7 @@ function AddScheduleItemModal({ isOpen, onClose, onAdd, selectedDate }) {
           required
         />
 
-        {/* Start Date and Time */}
+        {/* Start Date */}
         <label className="block mb-2 text-white">Data rozpoczęcia</label>
         <input
           type="date"
@@ -97,6 +134,8 @@ function AddScheduleItemModal({ isOpen, onClose, onAdd, selectedDate }) {
           onChange={handleChange}
           required
         />
+
+        {/* Start Time */}
         <label className="block mb-2 text-white">Godzina rozpoczęcia</label>
         <input
           type="time"
@@ -107,7 +146,7 @@ function AddScheduleItemModal({ isOpen, onClose, onAdd, selectedDate }) {
           required
         />
 
-        {/* End Date and Time */}
+        {/* End Date */}
         <label className="block mb-2 text-white">Data zakończenia</label>
         <input
           type="date"
@@ -117,6 +156,8 @@ function AddScheduleItemModal({ isOpen, onClose, onAdd, selectedDate }) {
           onChange={handleChange}
           required
         />
+
+        {/* End Time */}
         <label className="block mb-2 text-white">Godzina zakończenia</label>
         <input
           type="time"

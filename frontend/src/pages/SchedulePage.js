@@ -11,22 +11,26 @@ import {
   deleteScheduleItem,
 } from '../services/scheduleService';
 import AddScheduleItemModal from '../components/AddScheduleItemModal';
+import EditScheduleItemModal from '../components/EditScheduleItemModal';
+import Notification from '../components/Notification';
 
 const SchedulePage = () => {
   const [events, setEvents] = useState([]);
-  const [modalOpen, setModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState(null);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
-  // Fetch events on mount
+  // Fetch schedule data on load
   useEffect(() => {
     fetchEvents();
   }, []);
 
   const fetchEvents = async () => {
     try {
-      const data = await getSchedule();
-      setEvents(data);
+      const scheduleData = await getSchedule();
+      setEvents(scheduleData);
     } catch (error) {
       console.error('Error fetching schedule:', error);
     }
@@ -34,22 +38,8 @@ const SchedulePage = () => {
 
   const handleDateClick = (arg) => {
     setSelectedDate(arg.dateStr);
-    setEditingEvent(null); // Ensure we're not editing
-    setModalOpen(true);
-  };
-
-  const handleEventAdd = async (eventData) => {
-    try {
-      const newEvent = await addScheduleItem({
-        ...eventData,
-        startTime: selectedDate + 'T' + eventData.startTime,
-        endTime: selectedDate + 'T' + eventData.endTime,
-      });
-      setEvents([...events, newEvent]);
-      setModalOpen(false);
-    } catch (error) {
-      console.error('Error adding event:', error);
-    }
+    setEditingEvent(null); // Reset editing
+    setModalOpen(true); // Open modal for new event
   };
 
   const handleEventClick = (clickInfo) => {
@@ -57,14 +47,28 @@ const SchedulePage = () => {
     setEditingEvent({
       id,
       title,
+      startDate: startStr.split('T')[0],
       startTime: startStr.split('T')[1],
+      endDate: endStr.split('T')[0],
       endTime: endStr.split('T')[1],
       description: extendedProps.description,
       type: extendedProps.type,
       location: extendedProps.location,
     });
-    setSelectedDate(startStr.split('T')[0]); // Extract date
-    setModalOpen(true);
+    setModalOpen(true); // Open modal for editing
+  };
+
+  const handleEventAdd = async (eventData) => {
+    try {
+      const newEvent = await addScheduleItem(eventData);
+      setEvents([...events, { ...newEvent, display: 'auto' }]);
+      setModalOpen(false); // Close modal
+      setSuccessMessage('Dodano zadanie do kalendarza!');
+      fetchEvents(); // Refresh fullcalender
+    } catch (error) {
+      setErrorMessage('Błąd podczas dodawania zadania do kalendarza.');
+      console.error('Error adding event:', error);
+    }
   };
 
   const handleEventEdit = async (updatedData) => {
@@ -72,10 +76,11 @@ const SchedulePage = () => {
       const updatedEvent = await updateScheduleItem(editingEvent.id, updatedData);
       setEvents((prevEvents) =>
         prevEvents.map((event) =>
-          event.id === editingEvent.id ? { ...event, ...updatedEvent } : event
+          event.id === editingEvent.id ? updatedEvent : event
         )
       );
-      setModalOpen(false);
+      setModalOpen(false); // Close modal
+      fetchEvents(); // Refresh fullcalender
     } catch (error) {
       console.error('Error updating event:', error);
     }
@@ -85,38 +90,22 @@ const SchedulePage = () => {
     try {
       await deleteScheduleItem(id);
       setEvents(events.filter((event) => event.id !== id));
+      fetchEvents(); // Refresh fullcalender
     } catch (error) {
       console.error('Error deleting event:', error);
     }
   };
 
-  const handleEventDrop = async (info) => {
-    try {
-      const updatedEvent = {
-        startTime: info.event.start.toISOString(),
-        endTime: info.event.end.toISOString(),
-      };
-      await updateScheduleItem(info.event.id, updatedEvent);
-      setEvents((prevEvents) =>
-        prevEvents.map((event) =>
-          event.id === info.event.id ? { ...event, ...updatedEvent } : event
-        )
-      );
-    } catch (error) {
-      console.error('Error updating event position:', error);
-      info.revert(); // Revert the drop if update fails
-    }
-  };
-
   return (
-    <div className="container bg-gray-800 text-white mx-auto p-4 rounded-md">
+    <div className="container bg-gray-900 text-white mx-auto p-6 rounded-md">
       <h1 className="text-2xl mb-4">Kalendarz</h1>
       <button
         onClick={() => {
-          setModalOpen(true);
+          setSelectedDate(null);
           setEditingEvent(null);
+          setModalOpen(true);
         }}
-        className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+        className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition"
       >
         Dodaj zadanie
       </button>
@@ -126,8 +115,7 @@ const SchedulePage = () => {
         events={events}
         dateClick={handleDateClick}
         eventClick={handleEventClick}
-        eventDrop={handleEventDrop}
-        editable
+        editable={true}
         locales={[plLocale]}
         locale="pl"
         headerToolbar={{
@@ -137,16 +125,27 @@ const SchedulePage = () => {
         }}
       />
       {modalOpen && (
-        <AddScheduleItemModal
-          isOpen={modalOpen}
-          onClose={() => setModalOpen(false)}
-          onAdd={editingEvent ? handleEventEdit : handleEventAdd}
-          selectedDate={selectedDate}
-          editingEvent={editingEvent}
-        />
+        editingEvent ? (
+          <EditScheduleItemModal
+            isOpen={modalOpen}
+            onClose={() => setModalOpen(false)}
+            onEdit={handleEventEdit}
+            onDelete={handleEventDelete}
+            taskData={editingEvent}
+          />
+        ) : (
+          <AddScheduleItemModal
+            isOpen={modalOpen}
+            onClose={() => setModalOpen(false)}
+            onAdd={handleEventAdd}
+            selectedDate={selectedDate}
+          />
+        )
       )}
     </div>
   );
 };
 
 export default SchedulePage;
+
+
