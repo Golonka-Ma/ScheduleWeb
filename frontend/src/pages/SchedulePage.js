@@ -124,6 +124,7 @@ const SchedulePage = () => {
       description: extendedProps.description,
       type: extendedProps.type,
       location: extendedProps.location,
+      priority: extendedProps.priority,
     });
     setModalOpen(true); // Open modal for editing
   };
@@ -178,25 +179,38 @@ const SchedulePage = () => {
           setEditingEvent(null);
           setModalOpen(true);
         }}
-        className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+        className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition mb-4"
       >
         Dodaj zadanie
       </button>
       <FullCalendar
-        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-        initialView="dayGridMonth"
-        events={events}
-        dateClick={handleDateClick}
-        eventClick={handleEventClick}
-        editable={true}
-        locales={[plLocale]}
-        locale="pl"
-        headerToolbar={{
-          left: 'prev,next today',
-          center: 'title',
-          right: 'dayGridMonth,timeGridWeek,timeGridDay',
-        }}
-      />
+  plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+  initialView="dayGridMonth"
+events={events.map((event) => ({
+    ...event,
+    backgroundColor: 
+      event.extendedProps.priority === 'high' ? '#FF6347' : 
+      event.extendedProps.priority === 'medium' ? '#FFD700' : 
+      '#90EE90',
+    borderColor: '#FFDE21',
+  }))}
+  eventTimeFormat={{
+    hour: '2-digit',
+    minute: '2-digit',
+    meridiem: false,
+  }}
+  dateClick={handleDateClick}
+  eventClick={handleEventClick}
+  editable={true}
+  locales={[plLocale]}
+  locale="pl"
+  headerToolbar={{
+    left: 'prev,next today',
+    center: 'title',
+    right: 'dayGridMonth,timeGridWeek,timeGridDay',
+  }}
+/>
+
       {modalOpen && (
         editingEvent ? (
           <EditScheduleItemModal

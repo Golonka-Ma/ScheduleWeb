@@ -18,6 +18,7 @@ export const getSchedule = async () => {
       description: item.description,
       type: item.type,
       location: item.location,
+      priority: item.priority,
     },
   }));
 };

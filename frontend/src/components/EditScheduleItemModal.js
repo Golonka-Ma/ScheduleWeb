@@ -9,9 +9,9 @@ function EditScheduleItemModal({ isOpen, onClose, onEdit, onDelete, taskData }) 
     startTime: '',
     endTime: '',
     description: '',
+    priority: 'low',
   });
 
-  // Modal styles
   const customStyles = {
     content: {
       top: '50%',
@@ -20,7 +20,7 @@ function EditScheduleItemModal({ isOpen, onClose, onEdit, onDelete, taskData }) 
       bottom: 'auto',
       marginRight: '-50%',
       transform: 'translate(-50%, -50%)',
-      backgroundColor: '#00ff00',
+      backgroundColor: '#1f2937',
       border: 'none',
       borderRadius: '8px',
       padding: '20px',
@@ -39,9 +39,10 @@ function EditScheduleItemModal({ isOpen, onClose, onEdit, onDelete, taskData }) 
         title: taskData.title || '',
         type: taskData.type || '',
         location: taskData.location || '',
-        startTime: taskData.start || '', // Ensure proper format for datetime-local
-        endTime: taskData.end || '', // Ensure proper format for datetime-local
+        startTime: taskData.start || '',
+        endTime: taskData.end || '',
         description: taskData.description || '',
+        priority: taskData.priority || 'low',
       });
     }
   }, [taskData]);
@@ -96,6 +97,18 @@ function EditScheduleItemModal({ isOpen, onClose, onEdit, onDelete, taskData }) 
           placeholder="Location"
           required
         />
+        <label className="block mb-2 text-white">Priority</label>
+        <select
+          name="priority"
+          className="border p-2 w-full mb-4 bg-gray-700 text-white rounded-lg"
+          value={formData.priority}
+          onChange={handleChange}
+          required
+        >
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+        </select>
         <label className="block mb-2 text-white">Start Time</label>
         <input
           type="datetime-local"
@@ -149,3 +162,4 @@ function EditScheduleItemModal({ isOpen, onClose, onEdit, onDelete, taskData }) 
 }
 
 export default EditScheduleItemModal;
+
