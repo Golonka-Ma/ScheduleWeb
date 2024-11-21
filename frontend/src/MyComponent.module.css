@@ -1,0 +1,20 @@
+.myCustomClass {
+    background-color: #f0f0f0;
+    padding: 10px;
+  }
+  
+  .priority-high {
+    background-color: #FF6347 !important;
+    border-color: #FF6347 !important;
+  }
+  
+  .priority-medium {
+    background-color: #FFD700 !important;
+    border-color: #FFD700 !important;
+  }
+  
+  .priority-low {
+    background-color: #90EE90 !important;
+    border-color: #90EE90 !important;
+  }
+  
