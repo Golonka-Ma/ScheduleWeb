@@ -28,7 +28,7 @@ The Schedule Application is a web-based calendar system that allows users to man
 1. Clone the repository.
 2. Navigate to the backend directory:
    ```sh
-   cd schedulebackend
+   cd schedule backend
    ```
 3. Set up your **application.properties** file for database connection:
    ```properties
@@ -45,7 +45,7 @@ The Schedule Application is a web-based calendar system that allows users to man
 ### Frontend Setup
 1. Navigate to the frontend directory:
    ```sh
-   cd schedulefrontend
+   cd schedule frontend
    ```
 2. Install the dependencies:
    ```sh
@@ -91,5 +91,5 @@ This project is licensed under the MIT License.
 ## Contact
 For any questions or suggestions, feel free to contact the developers.
 - **Email**: marcin.golonka21@gmail.com
-- **GitHub**: [https://github.com/Golonka-Ma/scheduleapp](https://github.com/Golonka-Ma/scheduleapp)
+- **GitHub**: [[https://github.com/Golonka-Ma/scheduleapp]((https://github.com/Golonka-Ma/ScheduleWeb)) 
 
