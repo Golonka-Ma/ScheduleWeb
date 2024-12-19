@@ -252,4 +252,132 @@ public class ScheduleBackendUnitTests {
 		assertEquals(title, foundItem.get().getTitle());
 		verify(scheduleService, times(1)).findById(1L);
 	}
+
+	// 11. Test UserService: Empty optional if user not found by email
+	@Test
+	public void testUserServiceFindByEmailNotFound() {
+		String nonExistentEmail = "nonexistent@example.com";
+		when(userService.findByEmail(nonExistentEmail)).thenReturn(Optional.empty());
+
+		Optional<User> foundUser = userService.findByEmail(nonExistentEmail);
+		assertTrue(foundUser.isEmpty());
+		verify(userService, times(1)).findByEmail(nonExistentEmail);
+	}
+
+	// 12. Test ScheduleService: Empty optional if schedule item not found
+	@Test
+	public void testScheduleServiceFindByIdNotFound() {
+		Long nonExistentId = 999L;
+		when(scheduleService.findById(nonExistentId)).thenReturn(Optional.empty());
+
+		Optional<ScheduleItem> foundItem = scheduleService.findById(nonExistentId);
+		assertTrue(foundItem.isEmpty());
+		verify(scheduleService, times(1)).findById(nonExistentId);
+	}
+
+	// 13. Test UserService: registerUser called exactly once
+	@Test
+	public void testRegisterUserCalledOnce() {
+		User user = new User();
+		user.setEmail("singlecall@example.com");
+		user.setPassword("password123");
+
+		when(userService.registerUser(user)).thenReturn(user);
+		userService.registerUser(user);
+
+		verify(userService, times(1)).registerUser(user);
+	}
+
+	// 14. Test ScheduleService: Returning non-empty list of items for user
+	@Test
+	public void testGetScheduleForUserNonEmpty() {
+		Long userId = 2L;
+		ScheduleItem item = new ScheduleItem();
+		item.setTitle("NonEmptyTask");
+		when(scheduleService.getScheduleForUser(userId)).thenReturn(Collections.singletonList(item));
+
+		var items = scheduleService.getScheduleForUser(userId);
+		assertEquals(1, items.size());
+		assertEquals("NonEmptyTask", items.get(0).getTitle());
+		verify(scheduleService, times(1)).getScheduleForUser(userId);
+	}
+
+	// 15. Test UserService: Exception if registering user with null password
+	@Test
+	public void testRegisterUserNullPassword() {
+		User user = new User();
+		user.setEmail("nullpass@example.com");
+		user.setPassword(null);
+
+		doThrow(new RuntimeException("Password cannot be null")).when(userService).registerUser(user);
+
+		Exception exception = assertThrows(RuntimeException.class, () -> userService.registerUser(user));
+		assertEquals("Password cannot be null", exception.getMessage());
+		verify(userService, times(1)).registerUser(user);
+	}
+
+	// 16. Test UserService: Exception if registering user with null email
+	@Test
+	public void testRegisterUserNullEmail() {
+		User user = new User();
+		user.setEmail(null);
+		user.setPassword("password123");
+
+		doThrow(new RuntimeException("Email cannot be null")).when(userService).registerUser(user);
+
+		Exception exception = assertThrows(RuntimeException.class, () -> userService.registerUser(user));
+		assertEquals("Email cannot be null", exception.getMessage());
+		verify(userService, times(1)).registerUser(user);
+	}
+
+	// 17. Test ScheduleService: Adding null item throws exception
+	@Test
+	public void testScheduleServiceAddNullItem() {
+		doThrow(new RuntimeException("Item cannot be null")).when(scheduleService).addScheduleItem(null);
+
+		Exception exception = assertThrows(RuntimeException.class, () -> scheduleService.addScheduleItem(null));
+		assertEquals("Item cannot be null", exception.getMessage());
+		verify(scheduleService, times(1)).addScheduleItem(null);
+	}
+
+	// 18. Test UserService: Register duplicate email throws exception
+	@Test
+	public void testRegisterDuplicateEmail() {
+		User user = new User();
+		user.setEmail("dup@example.com");
+		user.setPassword("pass123");
+
+		when(userService.registerUser(user)).thenReturn(user);
+		userService.registerUser(user);
+
+		doThrow(new RuntimeException("Email already exists")).when(userService).registerUser(user);
+
+		Exception exception = assertThrows(RuntimeException.class, () -> userService.registerUser(user));
+		assertEquals("Email already exists", exception.getMessage());
+		verify(userService, times(2)).registerUser(user);
+	}
+
+	// 19. Test ScheduleService: getScheduleForUser returns empty for non-existent user ID
+	@Test
+	public void testGetScheduleForNonExistentUserId() {
+		Long nonExistentUserId = 999L;
+		when(scheduleService.getScheduleForUser(nonExistentUserId)).thenReturn(Collections.emptyList());
+
+		var items = scheduleService.getScheduleForUser(nonExistentUserId);
+		assertTrue(items.isEmpty(), "Should return empty list for non-existent user ID");
+		verify(scheduleService, times(1)).getScheduleForUser(nonExistentUserId);
+	}
+
+	// 20. Test UserService: Invalid email returns empty Optional
+	@Test
+	public void testFindUserByInvalidEmail() {
+		String invalidEmail = "notanemail";
+		when(userService.findByEmail(invalidEmail)).thenReturn(Optional.empty());
+
+		Optional<User> foundUser = userService.findByEmail(invalidEmail);
+		assertTrue(foundUser.isEmpty(), "Should return empty Optional for invalid email");
+		verify(userService, times(1)).findByEmail(invalidEmail);
+	}
+
+
 }
