@@ -32,10 +32,25 @@ The Schedule Application is a web-based calendar system that allows users to man
 - **User Authentication**: Secured authentication and personalized user experience.
 
 ## Technologies Used
-- **Frontend**: React.js, FullCalendar, TailwindCSS for styling.
-- **Backend**: Spring Boot, Java, Jakarta Persistence API (JPA), Hibernate.
-- **Database**: MySQL.
-- **Authentication**: JWT-based authentication for secure user management.
+
+### Backend:
+- Spring Boot (REST API)
+- Spring Security (JWT-based authentication)
+- Java Persistence API (JPA) with Hibernate
+- MySQL (Database)
+
+### Frontend:
+- React.js
+- FullCalendar (Calendar component)
+- TailwindCSS (Styling)
+
+### Build and Test Tools:
+- Maven (Backend build)
+- npm (Frontend build)
+- JUnit, Mockito (Testing)
+- Postman (Optional for manual API testing)
+
+This combination of technologies ensures a modern, maintainable, and scalable web application with robust testing and high-quality code.
 
 ## Installation Guide
 ### Prerequisites
@@ -385,24 +400,3 @@ Below are sample test cases prepared for manual testing. They verify core functi
 **Expected Result:** User is logged out and redirected to the login page.
 
 These test cases ensure comprehensive functionality and usability testing for the Schedule Application.
-
-## Technologies Used
-
-### Backend:
-- Spring Boot (REST API)
-- Spring Security (JWT-based authentication)
-- Java Persistence API (JPA) with Hibernate
-- MySQL (Database)
-
-### Frontend:
-- React.js
-- FullCalendar (Calendar component)
-- TailwindCSS (Styling)
-
-### Build and Test Tools:
-- Maven (Backend build)
-- npm (Frontend build)
-- JUnit, Mockito (Testing)
-- Postman (Optional for manual API testing)
-
-This combination of technologies ensures a modern, maintainable, and scalable web application with robust testing and high-quality code.
