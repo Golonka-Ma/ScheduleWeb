@@ -1,6 +1,5 @@
 package com.example.schedulebackend;
 
-import com.example.schedulebackend.dto.RegisterRequest;
 import com.example.schedulebackend.model.ScheduleItem;
 import com.example.schedulebackend.model.User;
 import com.example.schedulebackend.service.ScheduleService;
@@ -10,11 +9,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -34,7 +31,7 @@ public class ScheduleBackendUnitTests {
 		MockitoAnnotations.openMocks(this);
 	}
 
-	// 1. Test ScheduleService: Adding a Schedule Item
+	// FAIL #1
 	@Test
 	public void testAddScheduleItem() {
 		// Given
@@ -42,7 +39,7 @@ public class ScheduleBackendUnitTests {
 		item.setTitle(null);
 		item.setType("Work");
 		item.setLocation("Office");
-		item.setDescription("Team meeting to discuss project updates");
+		item.setDescription("Team meeting");
 		item.setStartTime(LocalDateTime.of(2024, 1, 1, 10, 0));
 		item.setEndTime(LocalDateTime.of(2024, 1, 1, 12, 0));
 		item.setPriority("High");
@@ -54,11 +51,11 @@ public class ScheduleBackendUnitTests {
 
 		// Then
 		assertNotNull(savedItem);
-		assertEquals("Incorrect Meeting", savedItem.getTitle());
+		assertEquals("Incorrect Meeting", savedItem.getTitle()); // Will fail because title is null
 		verify(scheduleService, times(1)).addScheduleItem(item);
 	}
 
-	// 2. Test ScheduleService: Finding a Schedule Item by ID
+	// FAIL #2
 	@Test
 	public void testFindScheduleItemById() {
 		// Given
@@ -67,7 +64,7 @@ public class ScheduleBackendUnitTests {
 		item.setTitle("Test Item");
 		item.setType("Personal");
 		item.setLocation("Home");
-		item.setDescription("A personal task to complete");
+		item.setDescription("A personal task");
 		item.setStartTime(LocalDateTime.now());
 		item.setEndTime(LocalDateTime.now().plusHours(1));
 		item.setPriority("Low");
@@ -78,12 +75,12 @@ public class ScheduleBackendUnitTests {
 		Optional<ScheduleItem> foundItem = scheduleService.findById(1L);
 
 		// Then
-		assertFalse(foundItem.isPresent());
-		assertEquals("Wrong Title", foundItem.get().getTitle());
+		assertFalse(foundItem.isPresent()); // Will fail because foundItem is actually present
+		assertEquals("Wrong Title", foundItem.get().getTitle()); // Would fail anyway
 		verify(scheduleService, times(1)).findById(1L);
 	}
 
-	// 3. Test UserService: Registering a User
+	// FAIL #3
 	@Test
 	public void testRegisterUser() {
 		// Given
@@ -100,11 +97,11 @@ public class ScheduleBackendUnitTests {
 
 		// Then
 		assertNotNull(registeredUser);
-		assertEquals("incorrect@example.com", registeredUser.getEmail());
+		assertEquals("incorrect@example.com", registeredUser.getEmail()); // Will fail, email is null
 		verify(userService, times(1)).registerUser(user);
 	}
 
-	// 4. Test UserService: Finding a User by Email
+	// FAIL #4
 	@Test
 	public void testFindUserByEmail() {
 		// Given
@@ -122,11 +119,11 @@ public class ScheduleBackendUnitTests {
 
 		// Then
 		assertTrue(foundUser.isPresent());
-		assertEquals(email, foundUser.get().getEmail());
+		assertEquals("wrong@example.com", foundUser.get().getEmail()); // Will fail, actual is email
 		verify(userService, times(1)).findByEmail(email);
 	}
 
-	// 5. Test ScheduleService: Deleting a Schedule Item
+	// FAIL #5
 	@Test
 	public void testDeleteScheduleItem() {
 		// Given
@@ -138,12 +135,13 @@ public class ScheduleBackendUnitTests {
 
 		// Then
 		verify(scheduleService, times(1)).deleteScheduleItem(itemId);
+		// Introduce failing condition
+		assertEquals(999, itemId); // Will fail because itemId is 1
 	}
 
-	// 6. Test UserService: Ensuring Unique User Emails
+	// PASS #6
 	@Test
 	public void testUniqueUserEmails() {
-		// Given
 		User user1 = new User();
 		user1.setFirstName("User1");
 		user1.setLastName("Test");
@@ -159,21 +157,18 @@ public class ScheduleBackendUnitTests {
 		when(userService.registerUser(user1)).thenReturn(user1);
 		doThrow(new RuntimeException("Email already exists")).when(userService).registerUser(user2);
 
-		// When
 		userService.registerUser(user1);
 		Exception exception = assertThrows(RuntimeException.class, () -> userService.registerUser(user2));
 
-		// Then
 		assertNotNull(exception);
 		assertEquals("Email already exists", exception.getMessage());
 		verify(userService, times(1)).registerUser(user1);
 		verify(userService, times(1)).registerUser(user2);
 	}
 
-	// 7. Test ScheduleService: Updating a Schedule Item
+	// PASS #7
 	@Test
 	public void testUpdateScheduleItem() {
-		// Given
 		ScheduleItem item = new ScheduleItem();
 		item.setId(1L);
 		item.setTitle("Initial Title");
@@ -184,57 +179,47 @@ public class ScheduleBackendUnitTests {
 		item.setDescription("Updated Description");
 		when(scheduleService.addScheduleItem(item)).thenReturn(item);
 
-		// When
 		ScheduleItem updatedItem = scheduleService.addScheduleItem(item);
 
-		// Then
 		assertNotNull(updatedItem);
 		assertEquals("Updated Title", updatedItem.getTitle());
 		assertEquals("Updated Description", updatedItem.getDescription());
 	}
 
-	// 8. Test ScheduleService: Handling Empty Title
+	// PASS #8
 	@Test
 	public void testHandleEmptyTitle() {
-		// Given
 		ScheduleItem item = new ScheduleItem();
-		item.setTitle(""); // Intentionally empty title
+		item.setTitle("");
 		item.setDescription("This is a test for an empty title");
 
 		doThrow(new RuntimeException("Title cannot be empty"))
 				.when(scheduleService).addScheduleItem(item);
 
-		// When
 		Exception exception = assertThrows(RuntimeException.class,
 				() -> scheduleService.addScheduleItem(item));
 
-		// Then
 		assertNotNull(exception);
 		assertEquals("Title cannot be empty", exception.getMessage());
 		verify(scheduleService, times(1)).addScheduleItem(item);
 	}
 
-
-	// 9. Test ScheduleService: Retrieving All Items for User
+	// PASS #9
 	@Test
 	public void testRetrieveAllItemsForUser() {
-		// Given
 		Long userId = 1L;
 		when(scheduleService.getScheduleForUser(userId)).thenReturn(Collections.emptyList());
 
-		// When
 		var items = scheduleService.getScheduleForUser(userId);
 
-		// Then
 		assertNotNull(items);
 		assertEquals(0, items.size());
 		verify(scheduleService, times(1)).getScheduleForUser(userId);
 	}
 
-	// 10. Test ScheduleService: Retrieving Schedule Item by Title
+	// PASS #10
 	@Test
 	public void testFindScheduleItemByTitle() {
-		// Given
 		String title = "Meeting";
 		ScheduleItem item = new ScheduleItem();
 		item.setTitle(title);
@@ -244,38 +229,40 @@ public class ScheduleBackendUnitTests {
 
 		when(scheduleService.findById(anyLong())).thenReturn(Optional.of(item));
 
-		// When
 		Optional<ScheduleItem> foundItem = scheduleService.findById(1L);
 
-		// Then
 		assertTrue(foundItem.isPresent());
 		assertEquals(title, foundItem.get().getTitle());
 		verify(scheduleService, times(1)).findById(1L);
 	}
 
-	// 11. Test UserService: Empty optional if user not found by email
+	// FAIL #11
 	@Test
 	public void testUserServiceFindByEmailNotFound() {
 		String nonExistentEmail = "nonexistent@example.com";
 		when(userService.findByEmail(nonExistentEmail)).thenReturn(Optional.empty());
 
 		Optional<User> foundUser = userService.findByEmail(nonExistentEmail);
-		assertTrue(foundUser.isEmpty());
+		// Originally correct: assertTrue(foundUser.isEmpty())
+		// Make it fail:
+		assertTrue(foundUser.isPresent()); // Will fail since it's empty
 		verify(userService, times(1)).findByEmail(nonExistentEmail);
 	}
 
-	// 12. Test ScheduleService: Empty optional if schedule item not found
+	// FAIL #12
 	@Test
 	public void testScheduleServiceFindByIdNotFound() {
 		Long nonExistentId = 999L;
 		when(scheduleService.findById(nonExistentId)).thenReturn(Optional.empty());
 
 		Optional<ScheduleItem> foundItem = scheduleService.findById(nonExistentId);
-		assertTrue(foundItem.isEmpty());
+		// Originally correct: assertTrue(foundItem.isEmpty())
+		// Make it fail:
+		assertFalse(foundItem.isEmpty()); // Will fail since it's actually empty
 		verify(scheduleService, times(1)).findById(nonExistentId);
 	}
 
-	// 13. Test UserService: registerUser called exactly once
+	// FAIL #13
 	@Test
 	public void testRegisterUserCalledOnce() {
 		User user = new User();
@@ -285,10 +272,12 @@ public class ScheduleBackendUnitTests {
 		when(userService.registerUser(user)).thenReturn(user);
 		userService.registerUser(user);
 
-		verify(userService, times(1)).registerUser(user);
+		// Originally correct: verify(userService, times(1)).registerUser(user);
+		// Make it fail:
+		verify(userService, times(2)).registerUser(user); // Will fail since it was called only once
 	}
 
-	// 14. Test ScheduleService: Returning non-empty list of items for user
+	// FAIL #14
 	@Test
 	public void testGetScheduleForUserNonEmpty() {
 		Long userId = 2L;
@@ -298,11 +287,13 @@ public class ScheduleBackendUnitTests {
 
 		var items = scheduleService.getScheduleForUser(userId);
 		assertEquals(1, items.size());
-		assertEquals("NonEmptyTask", items.get(0).getTitle());
+		// Originally correct: assertEquals("NonEmptyTask", items.get(0).getTitle());
+		// Make it fail:
+		assertEquals("WrongTask", items.get(0).getTitle()); // Will fail
 		verify(scheduleService, times(1)).getScheduleForUser(userId);
 	}
 
-	// 15. Test UserService: Exception if registering user with null password
+	// FAIL #15
 	@Test
 	public void testRegisterUserNullPassword() {
 		User user = new User();
@@ -312,11 +303,13 @@ public class ScheduleBackendUnitTests {
 		doThrow(new RuntimeException("Password cannot be null")).when(userService).registerUser(user);
 
 		Exception exception = assertThrows(RuntimeException.class, () -> userService.registerUser(user));
-		assertEquals("Password cannot be null", exception.getMessage());
+		// Originally correct: assertEquals("Password cannot be null", exception.getMessage());
+		// Make it fail:
+		assertEquals("This message is wrong", exception.getMessage()); // Will fail
 		verify(userService, times(1)).registerUser(user);
 	}
 
-	// 16. Test UserService: Exception if registering user with null email
+	// PASS #16
 	@Test
 	public void testRegisterUserNullEmail() {
 		User user = new User();
@@ -330,7 +323,7 @@ public class ScheduleBackendUnitTests {
 		verify(userService, times(1)).registerUser(user);
 	}
 
-	// 17. Test ScheduleService: Adding null item throws exception
+	// PASS #17
 	@Test
 	public void testScheduleServiceAddNullItem() {
 		doThrow(new RuntimeException("Item cannot be null")).when(scheduleService).addScheduleItem(null);
@@ -340,7 +333,7 @@ public class ScheduleBackendUnitTests {
 		verify(scheduleService, times(1)).addScheduleItem(null);
 	}
 
-	// 18. Test UserService: Register duplicate email throws exception
+	// PASS #18
 	@Test
 	public void testRegisterDuplicateEmail() {
 		User user = new User();
@@ -357,7 +350,7 @@ public class ScheduleBackendUnitTests {
 		verify(userService, times(2)).registerUser(user);
 	}
 
-	// 19. Test ScheduleService: getScheduleForUser returns empty for non-existent user ID
+	// PASS #19
 	@Test
 	public void testGetScheduleForNonExistentUserId() {
 		Long nonExistentUserId = 999L;
@@ -368,7 +361,7 @@ public class ScheduleBackendUnitTests {
 		verify(scheduleService, times(1)).getScheduleForUser(nonExistentUserId);
 	}
 
-	// 20. Test UserService: Invalid email returns empty Optional
+	// PASS #20
 	@Test
 	public void testFindUserByInvalidEmail() {
 		String invalidEmail = "notanemail";
@@ -378,6 +371,4 @@ public class ScheduleBackendUnitTests {
 		assertTrue(foundUser.isEmpty(), "Should return empty Optional for invalid email");
 		verify(userService, times(1)).findByEmail(invalidEmail);
 	}
-
-
 }

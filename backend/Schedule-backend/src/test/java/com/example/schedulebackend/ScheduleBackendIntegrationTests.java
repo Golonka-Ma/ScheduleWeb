@@ -7,7 +7,6 @@ import com.example.schedulebackend.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,7 +34,7 @@ public class ScheduleBackendIntegrationTests {
         userRepository.deleteAll();
     }
 
-    // 1. Test ScheduleItemRepository: Adding a Schedule Item
+    // FAIL #1
     @Test
     public void testAddScheduleItem() {
         // Given
@@ -53,10 +52,10 @@ public class ScheduleBackendIntegrationTests {
 
         // Then
         assertNotNull(savedItem.getId());
-        assertEquals("Wrong Title", savedItem.getTitle()); // Introduced error
+        assertEquals("Wrong Title", savedItem.getTitle()); // Introduced error, will fail
     }
 
-    // 2. Test ScheduleItemRepository: Finding a Schedule Item by ID
+    // FAIL #2
     @Test
     public void testFindScheduleItemById() {
         // Given
@@ -74,10 +73,10 @@ public class ScheduleBackendIntegrationTests {
         Optional<ScheduleItem> foundItem = scheduleItemRepository.findById(savedItem.getId());
 
         // Then
-        assertFalse(foundItem.isPresent()); // Introduced error
+        assertFalse(foundItem.isPresent()); // Introduced error, will fail since it is present
     }
 
-    // 3. Test ScheduleItemRepository: Deleting a Schedule Item
+    // FAIL #3
     @Test
     public void testDeleteScheduleItem() {
         // Given
@@ -96,10 +95,10 @@ public class ScheduleBackendIntegrationTests {
 
         // Then
         Optional<ScheduleItem> deletedItem = scheduleItemRepository.findById(savedItem.getId());
-        assertTrue(deletedItem.isPresent()); // Introduced error
+        assertTrue(deletedItem.isPresent()); // Introduced error, will fail since it should be deleted
     }
 
-    // 4. Test UserRepository: Adding a User
+    // FAIL #4
     @Test
     public void testAddUser() {
         // Given
@@ -113,10 +112,10 @@ public class ScheduleBackendIntegrationTests {
         User savedUser = userRepository.save(user);
 
         // Then
-        assertNull(savedUser.getId()); // Introduced error
+        assertNull(savedUser.getId()); // Introduced error, will fail since ID is generated
     }
 
-    // 5. Test UserRepository: Finding a User by Email
+    // FAIL #5
     @Test
     public void testFindUserByEmail() {
         // Given
@@ -128,14 +127,14 @@ public class ScheduleBackendIntegrationTests {
         userRepository.save(user);
 
         // When
-        Optional<User> foundUser = userRepository.findByEmail("john.doe@example.com"); // Introduced error
+        Optional<User> foundUser = userRepository.findByEmail("john.doe@example.com"); // Wrong email, will fail
 
         // Then
-        assertTrue(foundUser.isPresent());
+        assertTrue(foundUser.isPresent()); // Will fail, no user with this email
         assertEquals("Jane", foundUser.get().getFirstName());
     }
 
-    // 6. Test ScheduleItemRepository: Updating a Schedule Item
+    // PASS #6
     @Test
     public void testUpdateScheduleItem() {
         // Given
@@ -159,7 +158,7 @@ public class ScheduleBackendIntegrationTests {
         assertEquals("Updated Description", updatedItem.getDescription());
     }
 
-    // 7. Test UserRepository: Deleting a User
+    // PASS #7
     @Test
     public void testDeleteUser() {
         // Given
@@ -178,7 +177,7 @@ public class ScheduleBackendIntegrationTests {
         assertFalse(deletedUser.isPresent());
     }
 
-    // 8. Test ScheduleItemRepository: Retrieving All Items
+    // PASS #8
     @Test
     public void testRetrieveAllItems() {
         // Given
@@ -210,7 +209,7 @@ public class ScheduleBackendIntegrationTests {
         assertEquals(2, items.size());
     }
 
-    // 9.  Test ScheduleItemRepository: Ensuring No Duplicate Schedule Items
+    // PASS #9
     @Test
     public void testPreventDuplicateScheduleItems() {
         // Given
@@ -238,11 +237,11 @@ public class ScheduleBackendIntegrationTests {
         var allItems = scheduleItemRepository.findAll();
 
         // Then
-        assertEquals(2, allItems.size()); // Change this to your requirements, or ensure uniqueness elsewhere.
+        assertEquals(2, allItems.size());
         assertNotEquals(item1.getId(), item2.getId());
     }
 
-    // 10. Test ScheduleItemRepository: Finding Items by Title
+    // PASS #10
     @Test
     public void testFindItemsByTitle() {
         // Given
@@ -264,7 +263,7 @@ public class ScheduleBackendIntegrationTests {
         assertEquals("Specific Title", foundItem.get().getTitle());
     }
 
-    // 11. Test UserRepository: Saving and Finding User by ID
+    // FAIL #11
     @Test
     public void testSaveAndFindUserById() {
         User user = new User();
@@ -277,17 +276,19 @@ public class ScheduleBackendIntegrationTests {
         Optional<User> foundUser = userRepository.findById(savedUser.getId());
 
         assertTrue(foundUser.isPresent());
-        assertEquals("alice.wonder@example.com", foundUser.get().getEmail());
+        // Introduce error:
+        assertEquals("wrong.email@example.com", foundUser.get().getEmail()); // Will fail
     }
 
-    // 12. Test UserRepository: findAll() on empty database
+    // FAIL #12
     @Test
     public void testFindAllUsersWhenEmpty() {
         var users = userRepository.findAll();
-        assertEquals(0, users.size());
+        // Introduce error:
+        assertEquals(1, users.size()); // Will fail, there are no users
     }
 
-    // 13. Test UserRepository: Default roles assignment
+    // FAIL #13
     @Test
     public void testDefaultUserRoles() {
         User user = new User();
@@ -298,10 +299,11 @@ public class ScheduleBackendIntegrationTests {
         User savedUser = userRepository.save(user);
 
         assertNotNull(savedUser.getRoles());
-        assertTrue(savedUser.getRoles().contains("ROLE_USER"));
+        // Introduce error:
+        assertFalse(savedUser.getRoles().contains("ROLE_USER")); // Will fail, role is actually present
     }
 
-    // 14. Test ScheduleItemRepository: Empty schedule for user
+    // FAIL #14
     @Test
     public void testEmptyScheduleForUser() {
         User user = new User();
@@ -312,10 +314,11 @@ public class ScheduleBackendIntegrationTests {
         User savedUser = userRepository.save(user);
 
         var scheduleItems = scheduleItemRepository.findByUserId(savedUser.getId());
-        assertEquals(0, scheduleItems.size());
+        // Introduce error:
+        assertNotEquals(0, scheduleItems.size()); // Will fail, it's actually 0
     }
 
-    // 15. Test UserRepository: Counting multiple users
+    // FAIL #15
     @Test
     public void testCountingMultipleUsers() {
         User user1 = new User();
@@ -334,24 +337,25 @@ public class ScheduleBackendIntegrationTests {
         userRepository.save(user2);
 
         var allUsers = userRepository.findAll();
-        assertEquals(2, allUsers.size());
+        // Introduce error:
+        assertEquals(3, allUsers.size()); // Will fail, we expect 2
     }
 
-    // 16. Test UserRepository: Find by ID for non-existent User
+    // PASS #16
     @Test
     public void testFindUserByIdNonExistent() {
         Optional<User> foundUser = userRepository.findById(9999L);
         assertTrue(foundUser.isEmpty(), "User should not be found for non-existent ID");
     }
 
-    // 17. Test UserRepository: Finding a user by email that does not exist
+    // PASS #17
     @Test
     public void testFindUserByEmailNonExistent() {
         Optional<User> foundUser = userRepository.findByEmail("no.such.user@example.com");
         assertTrue(foundUser.isEmpty(), "Optional powinien być pusty, gdy użytkownik nie istnieje");
     }
 
-    // 18. Test ScheduleItemRepository: Saving an item associated with a user
+    // PASS #18
     @Test
     public void testSaveScheduleItemWithUser() {
         User user = new User();
@@ -376,7 +380,7 @@ public class ScheduleBackendIntegrationTests {
         assertEquals(savedUser.getId(), savedItem.getUser().getId(), "Item powinien należeć do zapisanego użytkownika");
     }
 
-    // 19. Test ScheduleItemRepository: Delete all items and verify empty
+    // PASS #19
     @Test
     public void testDeleteAllScheduleItems() {
         ScheduleItem item = new ScheduleItem();
@@ -394,11 +398,10 @@ public class ScheduleBackendIntegrationTests {
         assertTrue(allItems.isEmpty(), "All schedule items should be deleted");
     }
 
-    // 20. Test ScheduleItemRepository: Wyszukiwanie itemów po userId gdy nic nie zapisano
+    // PASS #20
     @Test
     public void testFindItemsByUserIdEmpty() {
         List<ScheduleItem> items = scheduleItemRepository.findByUserId(9999L);
         assertTrue(items.isEmpty(), "Lista powinna być pusta, gdy nie ma itemów dla danego userId");
     }
-
 }
