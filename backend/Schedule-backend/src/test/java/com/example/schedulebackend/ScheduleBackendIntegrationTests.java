@@ -13,6 +13,7 @@ import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -261,6 +262,143 @@ public class ScheduleBackendIntegrationTests {
         // Then
         assertTrue(foundItem.isPresent());
         assertEquals("Specific Title", foundItem.get().getTitle());
+    }
+
+    // 11. Test UserRepository: Saving and Finding User by ID
+    @Test
+    public void testSaveAndFindUserById() {
+        User user = new User();
+        user.setFirstName("Alice");
+        user.setLastName("Wonder");
+        user.setEmail("alice.wonder@example.com");
+        user.setPassword("securePassword123");
+
+        User savedUser = userRepository.save(user);
+        Optional<User> foundUser = userRepository.findById(savedUser.getId());
+
+        assertTrue(foundUser.isPresent());
+        assertEquals("alice.wonder@example.com", foundUser.get().getEmail());
+    }
+
+    // 12. Test UserRepository: findAll() on empty database
+    @Test
+    public void testFindAllUsersWhenEmpty() {
+        var users = userRepository.findAll();
+        assertEquals(0, users.size());
+    }
+
+    // 13. Test UserRepository: Default roles assignment
+    @Test
+    public void testDefaultUserRoles() {
+        User user = new User();
+        user.setFirstName("RoleTest");
+        user.setLastName("User");
+        user.setEmail("roletest@example.com");
+        user.setPassword("pass123");
+        User savedUser = userRepository.save(user);
+
+        assertNotNull(savedUser.getRoles());
+        assertTrue(savedUser.getRoles().contains("ROLE_USER"));
+    }
+
+    // 14. Test ScheduleItemRepository: Empty schedule for user
+    @Test
+    public void testEmptyScheduleForUser() {
+        User user = new User();
+        user.setFirstName("NoSchedule");
+        user.setLastName("User");
+        user.setEmail("noschedule@example.com");
+        user.setPassword("pass123");
+        User savedUser = userRepository.save(user);
+
+        var scheduleItems = scheduleItemRepository.findByUserId(savedUser.getId());
+        assertEquals(0, scheduleItems.size());
+    }
+
+    // 15. Test UserRepository: Counting multiple users
+    @Test
+    public void testCountingMultipleUsers() {
+        User user1 = new User();
+        user1.setFirstName("UserOne");
+        user1.setLastName("Test");
+        user1.setEmail("userone@example.com");
+        user1.setPassword("pass1");
+
+        User user2 = new User();
+        user2.setFirstName("UserTwo");
+        user2.setLastName("Test");
+        user2.setEmail("usertwo@example.com");
+        user2.setPassword("pass2");
+
+        userRepository.save(user1);
+        userRepository.save(user2);
+
+        var allUsers = userRepository.findAll();
+        assertEquals(2, allUsers.size());
+    }
+
+    // 16. Test UserRepository: Find by ID for non-existent User
+    @Test
+    public void testFindUserByIdNonExistent() {
+        Optional<User> foundUser = userRepository.findById(9999L);
+        assertTrue(foundUser.isEmpty(), "User should not be found for non-existent ID");
+    }
+
+    // 17. Test UserRepository: Finding a user by email that does not exist
+    @Test
+    public void testFindUserByEmailNonExistent() {
+        Optional<User> foundUser = userRepository.findByEmail("no.such.user@example.com");
+        assertTrue(foundUser.isEmpty(), "Optional powinien być pusty, gdy użytkownik nie istnieje");
+    }
+
+    // 18. Test ScheduleItemRepository: Saving an item associated with a user
+    @Test
+    public void testSaveScheduleItemWithUser() {
+        User user = new User();
+        user.setFirstName("Schedule");
+        user.setLastName("Owner");
+        user.setEmail("schedule.owner@example.com");
+        user.setPassword("password");
+        User savedUser = userRepository.save(user);
+
+        ScheduleItem item = new ScheduleItem();
+        item.setTitle("User Meeting");
+        item.setDescription("Meeting with the owner");
+        item.setPriority("High");
+        item.setLocation("Office");
+        item.setType("Work");
+        item.setStartTime(LocalDateTime.now());
+        item.setEndTime(LocalDateTime.now().plusHours(1));
+        item.setUser(savedUser);
+        ScheduleItem savedItem = scheduleItemRepository.save(item);
+
+        assertNotNull(savedItem.getId(), "Item powinien mieć przypisane ID po zapisie");
+        assertEquals(savedUser.getId(), savedItem.getUser().getId(), "Item powinien należeć do zapisanego użytkownika");
+    }
+
+    // 19. Test ScheduleItemRepository: Delete all items and verify empty
+    @Test
+    public void testDeleteAllScheduleItems() {
+        ScheduleItem item = new ScheduleItem();
+        item.setTitle("DeleteAll Task");
+        item.setType("Personal");
+        item.setLocation("Home");
+        item.setDescription("Delete test");
+        item.setPriority("Medium");
+        item.setStartTime(LocalDateTime.now());
+        item.setEndTime(LocalDateTime.now().plusHours(1));
+        scheduleItemRepository.save(item);
+
+        scheduleItemRepository.deleteAll();
+        var allItems = scheduleItemRepository.findAll();
+        assertTrue(allItems.isEmpty(), "All schedule items should be deleted");
+    }
+
+    // 20. Test ScheduleItemRepository: Wyszukiwanie itemów po userId gdy nic nie zapisano
+    @Test
+    public void testFindItemsByUserIdEmpty() {
+        List<ScheduleItem> items = scheduleItemRepository.findByUserId(9999L);
+        assertTrue(items.isEmpty(), "Lista powinna być pusta, gdy nie ma itemów dla danego userId");
     }
 
 }
