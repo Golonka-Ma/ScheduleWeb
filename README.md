@@ -1,4 +1,4 @@
-# Testowanie i Jakość Oprogramowania
+# ScheduleWeb
 
 ## Authors
 * Marcin Golonka 
