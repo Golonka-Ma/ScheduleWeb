@@ -31,6 +31,10 @@ The Schedule Application is a web-based calendar system that allows users to man
 - **Dark Mode**: A dark mode toggle option for better usability in different environments.
 - **User Authentication**: Secured authentication and personalized user experience.
 
+Application showcase:
+
+https://github.com/user-attachments/assets/98e1e1a0-4abb-423e-a7f7-7b04ec96916e
+
 ## Technologies Used
 
 ### Backend:
