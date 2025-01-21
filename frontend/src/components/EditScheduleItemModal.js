@@ -60,7 +60,7 @@ function EditScheduleItemModal({ isOpen, onClose, onEdit, onDelete, taskData }) 
   };
 
   const handleDelete = () => {
-    if (window.confirm('Are you sure you want to delete this task?')) {
+    if (window.confirm('Czy na pewno chcesz usunąć to zadanie?')) {
       onDelete(taskData.id);
       onClose();
     }
@@ -68,7 +68,7 @@ function EditScheduleItemModal({ isOpen, onClose, onEdit, onDelete, taskData }) 
 
   return (
     <Modal isOpen={isOpen} onRequestClose={onClose} style={customStyles}>
-      <h2 className="text-xl mb-4 text-white">Edit Task</h2>
+      <h2 className="text-xl mb-4 text-white">Edytuj zadanie</h2>
       <form onSubmit={handleSubmit}>
         <input
           type="text"
@@ -76,7 +76,7 @@ function EditScheduleItemModal({ isOpen, onClose, onEdit, onDelete, taskData }) 
           className="border p-2 w-full mb-4 bg-gray-700 text-white rounded-lg"
           value={formData.title}
           onChange={handleChange}
-          placeholder="Title"
+          placeholder="Tytuł"
           required
         />
         <input
@@ -85,7 +85,7 @@ function EditScheduleItemModal({ isOpen, onClose, onEdit, onDelete, taskData }) 
           className="border p-2 w-full mb-4 bg-gray-700 text-white rounded-lg"
           value={formData.type}
           onChange={handleChange}
-          placeholder="Type"
+          placeholder="Typ"
           required
         />
         <input
@@ -94,10 +94,11 @@ function EditScheduleItemModal({ isOpen, onClose, onEdit, onDelete, taskData }) 
           className="border p-2 w-full mb-4 bg-gray-700 text-white rounded-lg"
           value={formData.location}
           onChange={handleChange}
-          placeholder="Location"
+          placeholder="Lokalizacja"
           required
         />
-        <label className="block mb-2 text-white">Priority</label>
+
+        <label className="block mb-2 text-white">Priorytet</label>
         <select
           name="priority"
           className="border p-2 w-full mb-4 bg-gray-700 text-white rounded-lg"
@@ -105,11 +106,12 @@ function EditScheduleItemModal({ isOpen, onClose, onEdit, onDelete, taskData }) 
           onChange={handleChange}
           required
         >
-          <option value="low">Low</option>
-          <option value="medium">Medium</option>
-          <option value="high">High</option>
+          <option value="low">Niski</option>
+          <option value="medium">Średni</option>
+          <option value="high">Wysoki</option>
         </select>
-        <label className="block mb-2 text-white">Start Time</label>
+
+        <label className="block mb-2 text-white">Data i godzina rozpoczęcia</label>
         <input
           type="datetime-local"
           name="startTime"
@@ -118,7 +120,8 @@ function EditScheduleItemModal({ isOpen, onClose, onEdit, onDelete, taskData }) 
           onChange={handleChange}
           required
         />
-        <label className="block mb-2 text-white">End Time</label>
+
+        <label className="block mb-2 text-white">Data i godzina zakończenia</label>
         <input
           type="datetime-local"
           name="endTime"
@@ -127,21 +130,23 @@ function EditScheduleItemModal({ isOpen, onClose, onEdit, onDelete, taskData }) 
           onChange={handleChange}
           required
         />
+
         <textarea
           name="description"
           className="border p-2 w-full mb-4 bg-gray-700 text-white rounded-lg"
           value={formData.description}
           onChange={handleChange}
-          placeholder="Description"
+          placeholder="Opis zadania"
           required
         />
+
         <div className="flex justify-between">
           <button
             type="button"
             onClick={handleDelete}
             className="bg-red-500 text-white p-2 px-4 rounded-lg"
           >
-            Delete
+            Usuń
           </button>
           <div>
             <button
@@ -149,10 +154,10 @@ function EditScheduleItemModal({ isOpen, onClose, onEdit, onDelete, taskData }) 
               onClick={onClose}
               className="bg-gray-500 text-white p-2 px-4 rounded-lg mr-2"
             >
-              Cancel
+              Anuluj
             </button>
             <button type="submit" className="bg-green-500 text-white p-2 px-4 rounded-lg">
-              Save
+              Zapisz
             </button>
           </div>
         </div>
@@ -162,4 +167,3 @@ function EditScheduleItemModal({ isOpen, onClose, onEdit, onDelete, taskData }) 
 }
 
 export default EditScheduleItemModal;
-

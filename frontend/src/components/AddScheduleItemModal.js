@@ -6,15 +6,15 @@ function AddScheduleItemModal({ isOpen, onClose, onAdd, selectedDate }) {
     title: '',
     type: '',
     location: '',
-    startDate: selectedDate || '', // Ensure it's set correctly from props
+    startDate: selectedDate || '',
     startTime: '00:00',
     endDate: selectedDate || '',
     endTime: '01:00',
     description: '',
+    priority: 'low',
   });
 
   useEffect(() => {
-    // Update startDate and endDate if selectedDate changes
     if (selectedDate) {
       setFormData((prevState) => ({
         ...prevState,
@@ -26,18 +26,8 @@ function AddScheduleItemModal({ isOpen, onClose, onAdd, selectedDate }) {
 
   const customStyles = {
     content: {
-      top: '50%',
-      left: '50%',
-      right: 'auto',
-      bottom: 'auto',
-      marginRight: '-50%',
-      transform: 'translate(-50%, -50%)',
+      // ... Twoje style ...
       backgroundColor: '#1f2937',
-      border: 'none',
-      borderRadius: '8px',
-      padding: '20px',
-      width: '500px',
-      maxWidth: '90%',
     },
     overlay: {
       backgroundColor: 'rgba(0, 0, 0, 0.75)',
@@ -54,45 +44,36 @@ function AddScheduleItemModal({ isOpen, onClose, onAdd, selectedDate }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-  
     try {
-      // Validate that required fields are filled
       if (!formData.startDate || !formData.startTime || !formData.endDate || !formData.endTime) {
-        throw new Error('All date and time fields must be filled.');
+        throw new Error('Wszystkie pola daty i czasu muszą być wypełnione.');
       }
-  
-      // Combine date and time into ISO 8601 format
       const startTime = `${formData.startDate}T${formData.startTime}`;
       const endTime = `${formData.endDate}T${formData.endTime}`;
-  
       if (new Date(startTime) >= new Date(endTime)) {
-        throw new Error('Start time must be before end time.');
+        throw new Error('Czas rozpoczęcia musi być wcześniejszy niż czas zakończenia.');
       }
-  
-      // Pass correctly formatted data to the parent
       onAdd({
         title: formData.title,
         type: formData.type,
         location: formData.location,
-        startTime, // Correct ISO 8601 format
-        endTime, // Correct ISO 8601 format
+        startTime,
+        endTime,
         description: formData.description,
         priority: formData.priority,
       });
-  
-      onClose(); // Close the modal after submission
+      onClose();
     } catch (error) {
       console.error('Validation Error:', error.message);
       alert(error.message);
     }
   };
-  
 
   return (
     <Modal isOpen={isOpen} onRequestClose={onClose} contentLabel="Dodaj zadanie" style={customStyles}>
       <h2 className="text-xl mb-4 text-white">Dodaj zadanie</h2>
       <form onSubmit={handleSubmit}>
-        {/* Title */}
+        {/* Tytuł */}
         <input
           type="text"
           name="title"
@@ -103,7 +84,7 @@ function AddScheduleItemModal({ isOpen, onClose, onAdd, selectedDate }) {
           required
         />
 
-        {/* Type */}
+        {/* Typ */}
         <input
           type="text"
           name="type"
@@ -114,7 +95,7 @@ function AddScheduleItemModal({ isOpen, onClose, onAdd, selectedDate }) {
           required
         />
 
-        {/* Location */}
+        {/* Lokalizacja */}
         <input
           type="text"
           name="location"
@@ -125,22 +106,21 @@ function AddScheduleItemModal({ isOpen, onClose, onAdd, selectedDate }) {
           required
         />
 
-        {/* Priority */}
-<label className="block mb-2 text-white">Priority</label>
-<select
-  name="priority"
-  className="border p-2 w-full mb-4 bg-gray-700 text-white rounded-lg"
-  value={formData.priority}
-  onChange={handleChange}
-  required
->
-  <option value="low">Low</option>
-  <option value="medium">Medium</option>
-  <option value="high">High</option>
-</select>
+        {/* Priorytet */}
+        <label className="block mb-2 text-white">Priorytet</label>
+        <select
+          name="priority"
+          className="border p-2 w-full mb-4 bg-gray-700 text-white rounded-lg"
+          value={formData.priority}
+          onChange={handleChange}
+          required
+        >
+          <option value="low">Niski</option>
+          <option value="medium">Średni</option>
+          <option value="high">Wysoki</option>
+        </select>
 
-
-        {/* Start Date */}
+        {/* Data rozpoczęcia */}
         <label className="block mb-2 text-white">Data rozpoczęcia</label>
         <input
           type="date"
@@ -151,7 +131,7 @@ function AddScheduleItemModal({ isOpen, onClose, onAdd, selectedDate }) {
           required
         />
 
-        {/* Start Time */}
+        {/* Godzina rozpoczęcia */}
         <label className="block mb-2 text-white">Godzina rozpoczęcia</label>
         <input
           type="time"
@@ -162,7 +142,7 @@ function AddScheduleItemModal({ isOpen, onClose, onAdd, selectedDate }) {
           required
         />
 
-        {/* End Date */}
+        {/* Data zakończenia */}
         <label className="block mb-2 text-white">Data zakończenia</label>
         <input
           type="date"
@@ -173,7 +153,7 @@ function AddScheduleItemModal({ isOpen, onClose, onAdd, selectedDate }) {
           required
         />
 
-        {/* End Time */}
+        {/* Godzina zakończenia */}
         <label className="block mb-2 text-white">Godzina zakończenia</label>
         <input
           type="time"
@@ -184,17 +164,16 @@ function AddScheduleItemModal({ isOpen, onClose, onAdd, selectedDate }) {
           required
         />
 
-        {/* Description */}
+        {/* Opis */}
         <textarea
           name="description"
           className="border p-2 w-full mb-4 bg-gray-700 text-white rounded-lg"
           value={formData.description}
           onChange={handleChange}
-          placeholder="Opis"
+          placeholder="Opis zadania"
           required
         />
 
-        {/* Buttons */}
         <div className="flex justify-end">
           <button
             type="button"

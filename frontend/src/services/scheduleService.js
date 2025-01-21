@@ -9,6 +9,7 @@ export const getSchedule = async () => {
   const response = await axios.get(`${API_URL}/list`, {
     headers: { Authorization: `Bearer ${getToken()}` },
   });
+  
   return response.data.map((item) => ({
     id: item.id,
     title: item.title,
@@ -22,6 +23,7 @@ export const getSchedule = async () => {
     },
   }));
 };
+
 
 // Add a schedule item
 export const addScheduleItem = async (item) => {

@@ -4,63 +4,82 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import plLocale from '@fullcalendar/core/locales/pl';
-import {getSchedule,addScheduleItem,updateScheduleItem,deleteScheduleItem,} from '../services/scheduleService';
+import {
+  getSchedule,
+  addScheduleItem,
+  updateScheduleItem,
+  deleteScheduleItem,
+} from '../services/scheduleService';
 import AddScheduleItemModal from '../components/AddScheduleItemModal';
 import EditScheduleItemModal from '../components/EditScheduleItemModal';
-import { useNavigate } from "react-router-dom";
 import Notification from '../components/Notification';
-import { SunIcon, MoonIcon } from "@heroicons/react/24/solid";
+import { useNavigate } from 'react-router-dom';
+import { SunIcon, MoonIcon, ClockIcon } from '@heroicons/react/24/solid'; // <-- Dodajemy ClockIcon
+import { Link } from 'react-router-dom';
+
+// import scheduleLogo from '../assets/scheduleLogo.png';  // <-- Usuwamy lub komentujemy (nie jest już potrzebne)
 
 const Sidebar = ({ toggleDarkMode, darkMode }) => {
   const navigate = useNavigate();
+
   const handleLogout = () => {
-    localStorage.removeItem("authToken");
-    navigate("/login");
+    localStorage.removeItem('token');
+    navigate('/login');
   };
+
   return (
-    <div className="h-screen w-64 bg-gray-300 dark:bg-gray-800 text-gray-900 dark:text-gray-100 fixed top-0 left-0 flex flex-col items-center py-6">
-      <div className="mb-10">
-        <h1 className="text-2xl font-bold">Mój Harmonogram</h1>
-      </div>
-      <a
-        href="#"
-        className="mb-6 px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-600 focus:outline-none"
-      >
-        Ustawienia użytkownika
-      </a>
+    <div className="h-screen w-64 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 fixed top-0 left-0 flex flex-col items-center py-8 border-r border-gray-300 dark:border-gray-700 shadow-md">
       
-            {/* Spacer */}
-            <div className="flex-1"></div>
+      {/* Duża ikona zegara + tekst "ScheduleApp" */}
+      <div className="mb-10 text-center">
+        <ClockIcon className="w-16 h-16 mx-auto mb-2 text-blue-600 dark:text-blue-300" />
+        <h1 className="text-2xl font-bold tracking-wide">Zarządzaj czasem</h1>
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          Zarządzaj zadaniami
+        </p>
+      </div>
 
-{/* Dark Mode Toggle */}
-<div
-  className={`flex items-center justify-between w-40 px-4 py-2 rounded-full cursor-pointer ${
-    darkMode ? "bg-yellow-400" : "bg-blue-800"
-  }`}
-  onClick={toggleDarkMode}
->
-  {darkMode ? (
-    <>
-      <MoonIcon className="w-6 h-6 text-yellow-800" />
-      <span className="text-yellow-800 font-semibold">Tryb jasny</span>
-    </>
-  ) : (
-    <>
-      <SunIcon className="w-6 h-6 text-white" />
-      <span className="text-white font-semibold">Tryb ciemny</span>
-    </>
-  )}
-</div>
+      {/* Link do ustawień */}
+      <Link
+        to="/settings"
+        className="mb-6 w-40 text-center px-4 py-2 bg-gray-200 dark:bg-gray-700
+                   rounded-md hover:bg-gray-300 dark:hover:bg-gray-600
+                   transition-colors duration-300 shadow-sm"
+      >
+        Ustawienia
+      </Link>
 
-{/* Logout Button */}
-<button
-  onClick={handleLogout}
-  className="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:outline-none"
->
-  Wyloguj się
-</button>
-</div>
-);
+      <div className="flex-1"></div>
+
+      {/* Przycisk – tryb ciemny/jasny */}
+      <div
+        className={`flex items-center justify-between w-40 px-4 py-2 mb-4 rounded-full cursor-pointer transition-colors duration-300 ${
+          darkMode ? 'bg-yellow-400' : 'bg-blue-700'
+        }`}
+        onClick={toggleDarkMode}
+      >
+        {darkMode ? (
+          <>
+            <MoonIcon className="w-5 h-5 text-yellow-900 mr-2" />
+            <span className="text-yellow-900 font-semibold">Tryb jasny</span>
+          </>
+        ) : (
+          <>
+            <SunIcon className="w-5 h-5 text-white mr-2" />
+            <span className="text-white font-semibold">Tryb ciemny</span>
+          </>
+        )}
+      </div>
+
+      {/* Wylogowanie */}
+      <button
+        onClick={handleLogout}
+        className="w-40 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors shadow-sm"
+      >
+        Wyloguj
+      </button>
+    </div>
+  );
 };
 
 const SchedulePage = () => {
@@ -71,28 +90,27 @@ const SchedulePage = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const navigate = useNavigate();
-  
-  
+
   const [darkMode, setDarkMode] = useState(
-    localStorage.getItem("darkMode") === "true"
+    localStorage.getItem('darkMode') === 'true'
   );
-  
-  // Effect hook to apply the dark mode class
+
+  // Obsługa trybu ciemnego
   useEffect(() => {
     if (darkMode) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("darkMode", "true");
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('darkMode', 'true');
     } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("darkMode", "false");
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('darkMode', 'false');
     }
   }, [darkMode]);
-  
-  const toggleDarkMode = () => {
-    setDarkMode((prevDarkMode) => !prevDarkMode);
-  };
-  
 
+  const toggleDarkMode = () => {
+    setDarkMode((prev) => !prev);
+  };
+
+  // Pobranie eventów
   useEffect(() => {
     fetchEvents();
   }, []);
@@ -118,118 +136,213 @@ const SchedulePage = () => {
       id,
       title,
       startDate: startStr.split('T')[0],
-      startTime: startStr.split('T')[1],
+      startTime: startStr,
       endDate: endStr.split('T')[0],
-      endTime: endStr.split('T')[1],
+      endTime: endStr,
       description: extendedProps.description,
       type: extendedProps.type,
       location: extendedProps.location,
       priority: extendedProps.priority,
     });
-    setModalOpen(true); // Open modal for editing
+    setModalOpen(true);
   };
 
+  // Dodawanie eventu
   const handleEventAdd = async (eventData) => {
     try {
       const newEvent = await addScheduleItem(eventData);
-      setEvents([...events, { ...newEvent, display: 'auto' }]);
-      setModalOpen(false); // Close modal
+      const eventForCalendar = {
+        id: newEvent.id,
+        title: newEvent.title,
+        start: newEvent.startTime,
+        end: newEvent.endTime,
+        extendedProps: {
+          description: newEvent.description,
+          type: newEvent.type,
+          location: newEvent.location,
+          priority: newEvent.priority,
+        },
+        display: 'auto',
+      };
+
+      setEvents([...events, eventForCalendar]);
+      setModalOpen(false);
       setSuccessMessage('Dodano zadanie do kalendarza!');
-      fetchEvents(); // Refresh fullcalender
+      fetchEvents(); // Odświeżenie
     } catch (error) {
-      setErrorMessage('Błąd podczas dodawania zadania do kalendarza.');
+      setErrorMessage('Błąd podczas dodawania zadania do kalendarza.');
       console.error('Error adding event:', error);
     }
   };
 
+  // Edycja eventu
   const handleEventEdit = async (updatedData) => {
     try {
       const updatedEvent = await updateScheduleItem(editingEvent.id, updatedData);
-      setEvents((prevEvents) =>
-        prevEvents.map((event) =>
-          event.id === editingEvent.id ? updatedEvent : event
-        )
+      setEvents((prev) =>
+        prev.map((ev) => (ev.id === editingEvent.id ? updatedEvent : ev))
       );
-      setModalOpen(false); // Close modal
-      fetchEvents(); // Refresh fullcalender
+      setModalOpen(false);
+      fetchEvents();
     } catch (error) {
       console.error('Error updating event:', error);
     }
   };
 
+  // Usuwanie eventu
   const handleEventDelete = async (id) => {
     try {
       await deleteScheduleItem(id);
-      setEvents(events.filter((event) => event.id !== id));
-      fetchEvents(); // Refresh fullcalender
+      setEvents((prev) => prev.filter((ev) => ev.id !== id));
+      fetchEvents();
     } catch (error) {
       console.error('Error deleting event:', error);
     }
   };
 
-  return (
-    <div className={`flex bg-gray-100 dark:bg-gray-900 min-h-screen`}>
-    {/* Sidebar */}
-    <Sidebar toggleDarkMode={toggleDarkMode} darkMode={darkMode} />
-    <div className="ml-64 flex-1 container bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white mx-auto p-4 rounded-md">
-        <h1 className="text-2xl mb-4">Kalendarz</h1>
-      <button
-        onClick={() => {
-          setSelectedDate(null);
-          setEditingEvent(null);
-          setModalOpen(true);
-        }}
-        className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition mb-4"
-      >
-        Dodaj zadanie
-      </button>
-      <FullCalendar
-  plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-  initialView="dayGridMonth"
-events={events.map((event) => ({
-    ...event,
-    backgroundColor: 
-      event.extendedProps.priority === 'high' ? '#FF6347' : 
-      event.extendedProps.priority === 'medium' ? '#FFD700' : 
-      '#90EE90',
-    borderColor: '#FFDE21',
-  }))}
-  eventTimeFormat={{
-    hour: '2-digit',
-    minute: '2-digit',
-    meridiem: false,
-  }}
-  dateClick={handleDateClick}
-  eventClick={handleEventClick}
-  editable={true}
-  locales={[plLocale]}
-  locale="pl"
-  headerToolbar={{
-    left: 'prev,next today',
-    center: 'title',
-    right: 'dayGridMonth,timeGridWeek,timeGridDay',
-  }}
-/>
+  // DRAG & DROP przenoszenie
+  const handleEventDrop = async (info) => {
+    try {
+      const event = info.event;
+      const updatedData = {
+        title: event.title,
+        description: event.extendedProps.description,
+        location: event.extendedProps.location,
+        type: event.extendedProps.type,
+        priority: event.extendedProps.priority,
+        startTime: event.start.toISOString(),
+        endTime: event.end ? event.end.toISOString() : event.start.toISOString(),
+      };
+      await updateScheduleItem(event.id, updatedData);
+      fetchEvents();
+      setSuccessMessage('Zadanie zostało przeniesione.');
+    } catch (error) {
+      console.error('Error dragging event:', error);
+      setErrorMessage('Nie udało się zaktualizować zadania.');
+      info.revert();
+    }
+  };
 
-      {modalOpen && (
-        editingEvent ? (
-          <EditScheduleItemModal
-            isOpen={modalOpen}
-            onClose={() => setModalOpen(false)}
-            onEdit={handleEventEdit}
-            onDelete={handleEventDelete}
-            taskData={editingEvent}
+  // DRAG & DROP zmiana rozmiaru
+  const handleEventResize = async (info) => {
+    try {
+      const event = info.event;
+      const updatedData = {
+        title: event.title,
+        description: event.extendedProps.description,
+        location: event.extendedProps.location,
+        type: event.extendedProps.type,
+        priority: event.extendedProps.priority,
+        startTime: event.start.toISOString(),
+        endTime: event.end ? event.end.toISOString() : event.start.toISOString(),
+      };
+      await updateScheduleItem(event.id, updatedData);
+      fetchEvents();
+      setSuccessMessage('Zadanie zostało zmienione (rozmiar).');
+    } catch (error) {
+      console.error('Error resizing event:', error);
+      setErrorMessage('Nie udało się zaktualizować zadania.');
+      info.revert();
+    }
+  };
+
+  return (
+    <div className="flex bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-900 dark:to-gray-800 min-h-screen">
+      {/* Sidebar */}
+      <Sidebar toggleDarkMode={toggleDarkMode} darkMode={darkMode} />
+
+      {/* Główna zawartość */}
+      <div className="ml-64 flex-1 container mx-auto py-8 px-6">
+        {/* Nagłówek i przycisk dodawania */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-4 sm:mb-0">
+            Kalendarz
+          </h1>
+          <button
+            onClick={() => {
+              setSelectedDate(null);
+              setEditingEvent(null);
+              setModalOpen(true);
+            }}
+            className="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 transition-colors duration-200 
+                       focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+                       active:scale-95"
+          >
+            Dodaj zadanie
+          </button>
+        </div>
+
+        {/* Notyfikacje */}
+        <Notification
+          message={errorMessage}
+          type="error"
+          show={!!errorMessage}
+          onClose={() => setErrorMessage('')}
+        />
+        <Notification
+          message={successMessage}
+          type="success"
+          show={!!successMessage}
+          onClose={() => setSuccessMessage('')}
+        />
+
+        {/* Karta z kalendarzem */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
+          <FullCalendar
+            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+            initialView="dayGridMonth"
+            events={events.map((event) => ({
+              ...event,
+              backgroundColor:
+                event.extendedProps.priority === 'high'
+                  ? '#f87171' // czerwień (Tailwind: red-400)
+                  : event.extendedProps.priority === 'medium'
+                  ? '#facc15' // żółty (Tailwind: yellow-400)
+                  : '#86efac', // zielony (Tailwind: green-300)
+              borderColor: '#999999',
+            }))}
+            eventTimeFormat={{
+              hour: '2-digit',
+              minute: '2-digit',
+              meridiem: false,
+            }}
+            dateClick={handleDateClick}
+            eventClick={handleEventClick}
+            locales={[plLocale]}
+            locale="pl"
+            headerToolbar={{
+              left: 'prev,next today',
+              center: 'title',
+              right: 'dayGridMonth,timeGridWeek,timeGridDay',
+            }}
+            // DRAG & DROP
+            editable={true}
+            eventResizableFromStart={true}
+            droppable={true}
+            eventDrop={handleEventDrop}
+            eventResize={handleEventResize}
           />
-        ) : (
-          <AddScheduleItemModal
-            isOpen={modalOpen}
-            onClose={() => setModalOpen(false)}
-            onAdd={handleEventAdd}
-            selectedDate={selectedDate}
-          />
-        )
-      )}
-    </div>
+        </div>
+
+        {/* Modal (dodawanie / edycja) */}
+        {modalOpen &&
+          (editingEvent ? (
+            <EditScheduleItemModal
+              isOpen={modalOpen}
+              onClose={() => setModalOpen(false)}
+              onEdit={handleEventEdit}
+              onDelete={handleEventDelete}
+              taskData={editingEvent}
+            />
+          ) : (
+            <AddScheduleItemModal
+              isOpen={modalOpen}
+              onClose={() => setModalOpen(false)}
+              onAdd={handleEventAdd}
+              selectedDate={selectedDate}
+            />
+          ))}
+      </div>
     </div>
   );
 };
