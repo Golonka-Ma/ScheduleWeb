@@ -33,7 +33,7 @@ The Schedule Application is a web-based calendar system that allows users to man
 
 Application showcase:
 
-https://github.com/user-attachments/assets/98e1e1a0-4abb-423e-a7f7-7b04ec96916e
+https://github.com/user-attachments/assets/5e17800e-5f65-4a68-97c5-bd31e812f861
 
 And Test Application showcase:
 
