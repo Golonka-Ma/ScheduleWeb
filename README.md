@@ -2,7 +2,6 @@
 
 ## Authors
 * Marcin Golonka 
-* Jakub Jędrychowski
 
 ## Project Topic
 **Implementation of tests in a schedule management system**  
@@ -134,7 +133,7 @@ This project is licensed under the MIT License.
 
 ## Contact
 For any questions or suggestions, feel free to contact the developers.
-- **Email**: marcin.golonka21@gmail.com & jakubjedrychowski2@gmail.com
+- **Email**: marcin.golonka21@gmail.com
 - **GitHub**: [https://github.com/Golonka-Ma/ScheduleWeb](https://github.com/Golonka-Ma/ScheduleWeb)
 
 ## Running the Project
